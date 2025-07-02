@@ -8,7 +8,8 @@ echo "⏱️  Esto tomará unos minutos..."
 echo ""
 
 # Verificar que el sistema esté listo
-echo "🔍 Verificando sistema..."
+echo "🔍 Verificaecho ""
+echo "💡 ¡Sigue el tutorial.md para continuar!"o sistema..."
 if ! command -v curl &> /dev/null; then
     echo "📥 Instalando curl..."
     sudo apt install -y curl
@@ -67,13 +68,35 @@ echo "✅ Nginx instalado correctamente"
 # Iniciar servicios
 echo ""
 echo "🚀 Iniciando servicios..."
+
+# Detectar sistema de init
+echo ""
+echo "🔍 Detectando sistema de init..."
+if systemctl --version &>/dev/null && [ -d /run/systemd/system ]; then
+    echo "🔧 Sistema con systemd detectado"
+    INIT_SYSTEM="systemd"
+else
+    echo "🔧 Sistema con SysV init detectado (común en Cloud Shell y contenedores)"
+    INIT_SYSTEM="sysv"
+fi
+
 echo "🔧 Iniciando Jenkins..."
-sudo systemctl start jenkins
-sudo systemctl enable jenkins
+if [ "$INIT_SYSTEM" = "systemd" ]; then
+    sudo systemctl start jenkins
+    sudo systemctl enable jenkins
+else
+    sudo service jenkins start
+    sudo update-rc.d jenkins enable 2>/dev/null || echo "Jenkins habilitado para inicio automático"
+fi
 
 echo "🌐 Iniciando Nginx..."
-sudo systemctl start nginx
-sudo systemctl enable nginx
+if [ "$INIT_SYSTEM" = "systemd" ]; then
+    sudo systemctl start nginx
+    sudo systemctl enable nginx
+else
+    sudo service nginx start
+    sudo update-rc.d nginx enable 2>/dev/null || echo "Nginx habilitado para inicio automático"
+fi
 
 echo "✅ Servicios iniciados y habilitados para inicio automático"
 
@@ -85,7 +108,21 @@ max_attempts=60
 attempt=1
 
 while [ $attempt -le $max_attempts ]; do
-    if sudo systemctl is-active --quiet jenkins && curl -s http://localhost:8080 > /dev/null 2>&1; then
+    # Verificar si Jenkins está activo según el sistema de init
+    jenkins_running=false
+    
+    if [ "$INIT_SYSTEM" = "systemd" ]; then
+        if sudo systemctl is-active --quiet jenkins 2>/dev/null; then
+            jenkins_running=true
+        fi
+    else
+        if sudo service jenkins status 2>/dev/null | grep -q "is running\|started\|active"; then
+            jenkins_running=true
+        fi
+    fi
+    
+    # Verificar también que responda en el puerto 8080
+    if [ "$jenkins_running" = true ] && curl -s http://localhost:8080 > /dev/null 2>&1; then
         echo "✅ Jenkins está corriendo y respondiendo en puerto 8080"
         break
     else
@@ -97,11 +134,22 @@ done
 
 if [ $attempt -gt $max_attempts ]; then
     echo "❌ Jenkins no inició correctamente después de 5 minutos"
-    echo "🔍 Verificando logs de Jenkins..."
-    sudo journalctl -u jenkins --no-pager -l | tail -20
+    echo "🔍 Verificando estado de Jenkins..."
+    
+    if [ "$INIT_SYSTEM" = "systemd" ]; then
+        sudo journalctl -u jenkins --no-pager -l | tail -20 2>/dev/null || echo "No se pueden leer logs de systemd"
+    else
+        sudo service jenkins status || echo "No se puede verificar estado con service"
+        [ -f /var/log/jenkins/jenkins.log ] && sudo tail -20 /var/log/jenkins/jenkins.log || echo "Log de Jenkins no encontrado"
+    fi
+    
     echo ""
     echo "🔧 Intentando reiniciar Jenkins una vez más..."
-    sudo systemctl restart jenkins
+    if [ "$INIT_SYSTEM" = "systemd" ]; then
+        sudo systemctl restart jenkins
+    else
+        sudo service jenkins restart
+    fi
     echo "⏳ Esperando 30 segundos adicionales..."
     sleep 30
 fi
@@ -164,7 +212,11 @@ sudo rm -f /etc/nginx/sites-enabled/default
 echo "🔍 Verificando configuración de Nginx..."
 if sudo nginx -t; then
     echo "✅ Configuración de Nginx válida"
-    sudo systemctl reload nginx
+    if [ "$INIT_SYSTEM" = "systemd" ]; then
+        sudo systemctl reload nginx
+    else
+        sudo service nginx reload
+    fi
     echo "✅ Nginx recargado con nueva configuración"
 else
     echo "❌ Error en configuración de Nginx"
@@ -218,9 +270,18 @@ else
     echo "   sudo cat /var/lib/jenkins/secrets/initialAdminPassword"
 fi
 echo ""
-echo "�💡 ¡Sigue el tutorial.md para continuar!"
+echo "echo "�💡 ¡Sigue el tutorial.md para continuar!"
 echo ""
 echo "🛠️ Comandos útiles:"
-echo "   • Ver estado Jenkins: sudo systemctl status jenkins"
-echo "   • Ver logs Jenkins: sudo journalctl -u jenkins -f"
-echo "   • Reiniciar Jenkins: sudo systemctl restart jenkins"
+if [ "$INIT_SYSTEM" = "systemd" ]; then
+    echo "   • Ver estado Jenkins: sudo systemctl status jenkins"
+    echo "   • Ver logs Jenkins: sudo journalctl -u jenkins -f"
+    echo "   • Reiniciar Jenkins: sudo systemctl restart jenkins"
+    echo "   • Ver estado Nginx: sudo systemctl status nginx"
+else
+    echo "   • Ver estado Jenkins: sudo service jenkins status"
+    echo "   • Ver logs Jenkins: sudo tail -f /var/log/jenkins/jenkins.log"
+    echo "   • Reiniciar Jenkins: sudo service jenkins restart"
+    echo "   • Ver estado Nginx: sudo service nginx status"
+fi
+echo "   • Diagnóstico completo: ./diagnostico.sh"

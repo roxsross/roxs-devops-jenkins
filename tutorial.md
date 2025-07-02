@@ -23,6 +23,8 @@ cd roxs-devops-jenkins
 sudo ./instalar.sh
 ```
 
+> 💡 **El script es inteligente**: Detecta automáticamente si tu sistema usa systemd (Ubuntu moderno) o SysV init (Cloud Shell, contenedores) y usa los comandos correctos.
+
 ### En tu propia computadora Linux:
 Usa los mismos comandos de arriba.
 

@@ -31,16 +31,37 @@ fi
 # Verificar estado del servicio
 echo ""
 echo "🔧 Verificando servicio Jenkins..."
-jenkins_status=$(sudo systemctl is-active jenkins 2>/dev/null || echo "inactive")
-echo "Estado del servicio: $jenkins_status"
 
-if [ "$jenkins_status" = "active" ]; then
-    echo "✅ Servicio Jenkins está activo"
+# Detectar sistema de init
+if systemctl --version &>/dev/null && [ -d /run/systemd/system ]; then
+    INIT_SYSTEM="systemd"
+    echo "Sistema de init: systemd"
 else
-    echo "⚠️ Servicio Jenkins no está activo"
-    echo "🔧 Intentando iniciar..."
-    sudo systemctl start jenkins
-    sleep 10
+    INIT_SYSTEM="sysv"
+    echo "Sistema de init: SysV (común en Cloud Shell/contenedores)"
+fi
+
+if [ "$INIT_SYSTEM" = "systemd" ]; then
+    jenkins_status=$(sudo systemctl is-active jenkins 2>/dev/null || echo "inactive")
+    echo "Estado del servicio: $jenkins_status"
+    
+    if [ "$jenkins_status" = "active" ]; then
+        echo "✅ Servicio Jenkins está activo"
+    else
+        echo "⚠️ Servicio Jenkins no está activo"
+        echo "🔧 Intentando iniciar..."
+        sudo systemctl start jenkins
+        sleep 10
+    fi
+else
+    if sudo service jenkins status 2>/dev/null | grep -q "is running\|started\|active"; then
+        echo "✅ Servicio Jenkins está activo"
+    else
+        echo "⚠️ Servicio Jenkins no está activo"
+        echo "🔧 Intentando iniciar..."
+        sudo service jenkins start
+        sleep 10
+    fi
 fi
 
 # Verificar puerto 8080
@@ -67,7 +88,18 @@ fi
 echo ""
 echo "📝 Últimos logs de Jenkins:"
 echo "----------------------------"
-sudo journalctl -u jenkins --no-pager -n 10 2>/dev/null || echo "No se pueden leer los logs"
+if [ "$INIT_SYSTEM" = "systemd" ]; then
+    sudo journalctl -u jenkins --no-pager -n 10 2>/dev/null || echo "No se pueden leer los logs de systemd"
+else
+    if [ -f /var/log/jenkins/jenkins.log ]; then
+        sudo tail -10 /var/log/jenkins/jenkins.log
+    elif [ -f /var/log/jenkins.log ]; then
+        sudo tail -10 /var/log/jenkins.log
+    else
+        echo "No se encontraron logs de Jenkins en ubicaciones comunes"
+        echo "💡 Verifica el estado con: sudo service jenkins status"
+    fi
+fi
 
 # Verificar archivo de contraseña
 echo ""
@@ -105,14 +137,25 @@ echo ""
 echo "🛠️ COMANDOS ÚTILES PARA RESOLVER PROBLEMAS:"
 echo "============================================="
 echo ""
-echo "🔄 Reiniciar Jenkins:"
-echo "   sudo systemctl restart jenkins"
-echo ""
-echo "📝 Ver logs en tiempo real:"
-echo "   sudo journalctl -u jenkins -f"
-echo ""
-echo "🔍 Ver estado detallado:"
-echo "   sudo systemctl status jenkins"
+if [ "$INIT_SYSTEM" = "systemd" ]; then
+    echo "🔄 Reiniciar Jenkins:"
+    echo "   sudo systemctl restart jenkins"
+    echo ""
+    echo "📝 Ver logs en tiempo real:"
+    echo "   sudo journalctl -u jenkins -f"
+    echo ""
+    echo "🔍 Ver estado detallado:"
+    echo "   sudo systemctl status jenkins"
+else
+    echo "🔄 Reiniciar Jenkins:"
+    echo "   sudo service jenkins restart"
+    echo ""
+    echo "📝 Ver logs:"
+    echo "   sudo tail -f /var/log/jenkins/jenkins.log"
+    echo ""
+    echo "🔍 Ver estado detallado:"
+    echo "   sudo service jenkins status"
+fi
 echo ""
 echo "🔧 Si Jenkins no inicia, verificar configuración:"
 echo "   sudo nano /etc/default/jenkins"

@@ -41,6 +41,14 @@ sudo ./instalar.sh
 ./diagnostico.sh
 ```
 
+### 🔧 Compatibilidad total:
+✅ **Google Cloud Shell** - Funciona perfecto  
+✅ **Ubuntu/Debian** - Con systemd o SysV  
+✅ **Contenedores Docker** - Sin systemd  
+✅ **VMs en la nube** - AWS, Azure, GCP  
+
+*Los scripts detectan automáticamente tu sistema y usan los comandos correctos*
+
 ---
 
 ## 🎯 ¿Qué aprenderás?
