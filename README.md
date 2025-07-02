@@ -28,6 +28,25 @@
 
 ## 🚀 ¡Empezá ahora mismo!
 
+### 🌐 Opción 1: Google Cloud Shell (Recomendado)
+
+[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/roxsross/roxs-devops-jenkins.git&cloudshell_tutorial=tutorial.md)
+
+**¡Un solo clic y ya tienes todo listo!**
+
+#### O manualmente:
+```bash
+# 1. Abre Google Cloud Shell: https://shell.cloud.google.com
+# 2. Clona el repositorio
+git clone https://github.com/roxsross/roxs-devops-jenkins.git
+cd roxs-devops-jenkins
+
+# 3. Inicio automático para Cloud Shell
+./cloudshell-start.sh
+```
+
+### 🖥️ Opción 2: Tu propio servidor Linux
+
 ### Opción 1: Validación y Setup Automático
 
 ```bash

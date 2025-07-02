@@ -27,11 +27,53 @@
 
 ## 📋 Pre-requisitos
 
+### 🌐 Para Google Cloud Shell (Recomendado):
+- ✅ Cuenta de Google (gratuita)
+- ✅ Acceso a [Google Cloud Shell](https://shell.cloud.google.com)
+- ✅ Navegador web moderno
+- ✅ ¡Nada más! Cloud Shell tiene todo preconfigurado
+
+### 🖥️ Para servidor propio:
 - ✅ Servidor Linux (Ubuntu 20.04+ recomendado)
 - ✅ Acceso root/sudo al servidor
 - ✅ 2GB RAM mínimo (4GB recomendado)
 - ✅ Conexión a internet estable
 - ✅ Navegador web para Jenkins UI
+
+---
+
+## 🚀 Paso 0: Preparar Google Cloud Shell (Nuevo)
+
+### Si usas Google Cloud Shell:
+
+1. **Abre Cloud Shell**: Ve a [shell.cloud.google.com](https://shell.cloud.google.com)
+2. **Clona el repositorio**:
+   ```bash
+   git clone https://github.com/roxsross/roxs-devops-jenkins.git
+   cd roxs-devops-jenkins
+   ```
+3. **¡Listo!** El tutorial se abrirá automáticamente
+
+### Verificar Cloud Shell:
+```bash
+# Verificar que estás en Cloud Shell
+echo $CLOUD_SHELL
+echo $DEVSHELL_PROJECT_ID
+
+# Ver recursos disponibles
+free -h
+df -h
+```
+
+**Salida esperada en Cloud Shell:**
+```
+Memoria: ~15GB disponible
+Disco: ~5GB en $HOME (persistente)
+CPU: Compartida, suficiente para Jenkins
+Conectividad: Excelente
+```
+
+> 💡 **Ventajas de Cloud Shell**: Entorno preconfigurado, acceso desde cualquier lugar, sin instalaciones locales
 
 ---
 
@@ -149,13 +191,26 @@ sudo cat /root/jenkins-info.txt
 sudo cat /var/lib/jenkins/secrets/initialAdminPassword
 ```
 
-### Configurar Jenkins:
+### Acceder a Jenkins:
 
+#### 🌐 En Google Cloud Shell:
+1. **Obtén la URL de vista previa**:
+   ```bash
+   echo "🌐 Jenkins URL: https://8080-$(curl -s ifconfig.me | tr '.' '-')-8080.googleusercontent.com"
+   ```
+2. **O usa Web Preview**: En Cloud Shell, clic en "Web Preview" → "Preview on port 8080"
+3. **Introduce la contraseña inicial** obtenida arriba
+
+#### 🖥️ En servidor propio:
 1. **Abre tu navegador** y ve a: `http://TU-IP-SERVIDOR:8080`
 2. **Introduce la contraseña inicial** obtenida arriba
-3. **Selecciona**: "Install suggested plugins"
-4. **Espera** a que se instalen los plugins (5-10 minutos)
-5. **Crea usuario administrador**:
+
+### Configurar Jenkins:
+
+1. **Introduce la contraseña inicial**
+2. **Selecciona**: "Install suggested plugins"
+3. **Espera** a que se instalen los plugins (5-10 minutos)
+4. **Crea usuario administrador**:
    - Username: `devops-admin`
    - Password: `DevOps2024!`
    - Full name: `DevOps Administrator`
@@ -296,8 +351,25 @@ portfolio-logs
 
 ## 🌐 Paso 7: Verificar tu sitio web
 
-### URLs para verificar:
+### 🌐 En Google Cloud Shell:
 
+#### Obtener URLs de Cloud Shell:
+```bash
+# URL del portafolio en Cloud Shell
+echo "🌐 Portafolio: https://80-$(curl -s ifconfig.me | tr '.' '-')-80.googleusercontent.com"
+
+# O usar Web Preview para puerto 80
+echo "💡 También puedes usar: Web Preview → Preview on port 80"
+```
+
+#### Usar Web Preview:
+1. **En Cloud Shell**: Clic en "Web Preview" (ícono de preview)
+2. **Selecciona**: "Preview on port 80"
+3. **¡Tu portafolio se abrirá** en nueva pestaña!
+
+### 🖥️ En servidor propio:
+
+#### URLs para verificar:
 ```bash
 # URL principal de tu portafolio
 echo "🌐 Portafolio: http://$(hostname -I | awk '{print $1}')"
@@ -312,7 +384,7 @@ echo "🔍 Status: http://$(hostname -I | awk '{print $1}')/status"
 echo "❤️ Health: http://$(hostname -I | awk '{print $1}')/health"
 ```
 
-### Verificar desde terminal:
+### ✅ Verificar desde terminal (ambos entornos):
 
 ```bash
 # Test básico
@@ -323,6 +395,13 @@ curl http://localhost/status
 
 # Test de health
 curl http://localhost/health
+```
+
+### 📱 Compartir tu URL (Cloud Shell):
+```bash
+# Generar URL para compartir
+echo "🌐 Comparte tu portafolio:"
+echo "https://80-$(curl -s ifconfig.me | tr '.' '-')-80.googleusercontent.com"
 ```
 
 ---
@@ -537,3 +616,37 @@ Has completado exitosamente tu **práctica completa de Jenkins CI/CD**.
 *Transformando desarrolladores en DevOps Engineers*
 
 </div>
+
+## 🌐 Quick Start para Google Cloud Shell
+
+¿Quieres la experiencia más rápida? ¡Usa nuestro script automático!
+
+### 🚀 Instalación en un comando:
+```bash
+# Ejecuta TODO automáticamente
+./cloudshell-start.sh
+```
+
+### ¿Qué hace este script?
+1. ✅ **Detecta** que estás en Cloud Shell
+2. ✅ **Verifica** recursos disponibles
+3. ✅ **Configura** persistencia de datos
+4. ✅ **Instala** Jenkins y Nginx automáticamente
+5. ✅ **Genera** URLs dinámicas de Cloud Shell
+6. ✅ **Muestra** contraseña inicial de Jenkins
+7. ✅ **Configura** scripts de restauración
+
+### Después del reinicio de Cloud Shell:
+```bash
+# Restaurar Jenkins rápidamente
+~/restore-jenkins.sh
+
+# Ver URLs actuales
+cat ~/jenkins-urls.txt
+
+# O generar nuevas URLs
+echo "Jenkins: https://8080-$(curl -s ifconfig.me | tr '.' '-')-8080.googleusercontent.com"
+echo "Portafolio: https://80-$(curl -s ifconfig.me | tr '.' '-')-80.googleusercontent.com"
+```
+
+---

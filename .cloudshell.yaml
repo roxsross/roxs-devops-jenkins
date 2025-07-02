@@ -11,27 +11,56 @@ environment:
   JENKINS_HOME: "/var/lib/jenkins"
   JENKINS_USER: "devops-admin"
   JENKINS_PASS: "DevOps2024!"
+  CLOUDSHELL_TUTORIAL_PATH: "tutorial.md"
 
-# Comandos que se ejecutarán al iniciar
+# Comandos que se ejecutarán al iniciar Cloud Shell
 pre_requisites:
-  - title: "Verificar sistema"
-    description: "Verificamos que el sistema esté listo para Jenkins"
-    command: "uname -a && free -h && df -h"
+  - title: "🌐 Bienvenido a Jenkins CI/CD en Cloud Shell"
+    description: "Inicializando entorno para práctica de Jenkins"
+    command: "echo '🚀 Iniciando práctica Jenkins CI/CD en Google Cloud Shell!' && echo '📍 Ubicación: '$(pwd)"
   
-  - title: "Verificar Git"  
-    description: "Verificamos que Git esté disponible"
-    command: "git --version"
+  - title: "🔍 Verificar sistema Cloud Shell"
+    description: "Verificamos recursos disponibles en Cloud Shell"
+    command: "echo '💾 Memoria:' && free -h | grep Mem && echo '💽 Disco:' && df -h | grep cloudshell && echo '🌐 IP externa:' && curl -s ifconfig.me"
+  
+  - title: "🛠️ Verificar herramientas preinstaladas"  
+    description: "Verificamos que Git y Java estén disponibles"
+    command: "echo '📝 Git:' $(git --version) && echo '☕ Java:' $(java -version 2>&1 | head -1) && echo '🐧 OS:' $(lsb_release -d | cut -f2)"
     
-  - title: "Verificar conectividad"
-    description: "Verificamos conectividad a internet"
-    command: "ping -c 3 google.com"
+  - title: "📋 Mostrar archivos del proyecto"
+    description: "Lista de archivos y scripts disponibles"
+    command: "echo '📁 Archivos del proyecto:' && ls -la --color=auto | grep -E '\\.(sh|md|conf)$|^d' && echo '✅ ¡Todo listo para comenzar!'"
 
 # Configuración del workspace
 workspace:
-  # Archivos que se mostrarán en el explorador
+  # Archivos que se mostrarán en el explorador al inicio
   open_files:
     - "tutorial.md"
     - "README-JENKINS.md"
-    - "GUIA-PASO-A-PASO.md"
     - "validate-environment.sh"
     - "install-jenkins.sh"
+    - "Jenkinsfile"
+
+# Configuración específica para Cloud Shell
+cloudshell:
+  # Mensaje de bienvenida personalizado
+  welcome_message: |
+    🎉 ¡Bienvenido a la Práctica Jenkins CI/CD!
+    
+    📚 Tutorial principal: tutorial.md (se abrirá automáticamente)
+    🔧 Scripts listos: validate-environment.sh, install-jenkins.sh
+    🌐 Cloud Shell está preconfigurado para Jenkins
+    
+    ▶️ Para comenzar inmediatamente:
+    ./validate-environment.sh
+    
+    💡 Tip: Usa 'Web Preview' para ver Jenkins (puerto 8080) y tu portafolio (puerto 80)
+
+# Configuración de puertos para preview
+port_forwarding:
+  - port: 8080
+    description: "Jenkins UI"
+  - port: 80  
+    description: "Portafolio web desplegado"
+  - port: 3000
+    description: "Desarrollo adicional"
