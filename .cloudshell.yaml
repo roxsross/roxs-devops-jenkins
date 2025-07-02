@@ -1,0 +1,11 @@
+# Tutorial Jenkins para Principiantes
+cloudshell_tutorial:
+  path: tutorial.md
+
+# Archivos a mostrar al empezar
+workspace:
+  open_files:
+    - "tutorial.md"
+    - "README.md"
+    - "instalar.sh"
+    - "Jenkinsfile"

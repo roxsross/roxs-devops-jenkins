@@ -12,7 +12,7 @@ sudo apt update -qq
 
 # Instalar Java (necesario para Jenkins)
 echo "☕ Instalando Java..."
-sudo apt install -y openjdk-11-jdk
+sudo apt install -y fontconfig java-21-openjdk
 
 # Instalar Jenkins
 echo "🔧 Instalando Jenkins..."
