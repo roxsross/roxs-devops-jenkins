@@ -88,11 +88,9 @@ update_system() {
     apt update -y
     print_success "Lista de paquetes actualizada"
     
-    apt upgrade -y
-    print_success "Sistema actualizado"
     
     # Instalar paquetes básicos necesarios
-    apt install -y curl wget gnupg2 software-properties-common apt-transport-https ca-certificates lsb-release
+    apt install -y curl wget gnupg2 fontconfig software-properties-common apt-transport-https ca-certificates lsb-release
     print_success "Paquetes básicos instalados"
 }
 
@@ -114,8 +112,8 @@ install_java() {
         fi
     fi
     
-    apt install -y openjdk-11-jdk
-    print_success "OpenJDK 11 instalado"
+    apt install -y openjdk-21-jre
+    print_success "OpenJDK 21 instalado"
     
     # Configurar JAVA_HOME
     java_home=$(readlink -f /usr/bin/java | sed "s:bin/java::")
