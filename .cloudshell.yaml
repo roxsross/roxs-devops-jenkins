@@ -8,4 +8,5 @@ workspace:
     - "tutorial.md"
     - "README.md"
     - "instalar.sh"
+    - "diagnostico.sh"
     - "Jenkinsfile"

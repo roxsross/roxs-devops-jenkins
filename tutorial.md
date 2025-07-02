@@ -112,13 +112,26 @@ nano site/gaming-hub.html
 
 ## 🐛 ¿Algo no funciona?
 
-### Jenkins no abre:
+### Jenkins no abre (Error: "Unable to forward your request"):
 ```bash
-# Verifica que esté corriendo
+# 1. Ejecutar diagnóstico automático
+./diagnostico.sh
+
+# 2. Verificar que Jenkins esté corriendo
 sudo systemctl status jenkins
 
-# Si no está activo:
+# 3. Si no está activo, iniciarlo:
 sudo systemctl start jenkins
+
+# 4. Esperar 2-3 minutos y verificar:
+curl http://localhost:8080
+```
+
+### Jenkins tarda en cargar:
+```bash
+# Jenkins puede tomar 2-5 minutos en iniciarse completamente
+# Espera y verifica cada minuto:
+sudo journalctl -u jenkins -f
 ```
 
 ### El sitio no se ve:
@@ -134,6 +147,11 @@ sudo systemctl start nginx
 ```bash
 sudo cat /var/lib/jenkins/secrets/initialAdminPassword
 ```
+
+### En Google Cloud Shell:
+- **Jenkins**: Web Preview → Preview on port 8080
+- **Tu sitio**: Web Preview → Preview on port 80
+- Si no funciona, espera 3-5 minutos y reintenta
 
 ---
 

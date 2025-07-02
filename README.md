@@ -31,8 +31,15 @@ sudo ./instalar.sh
 
 - **📖 Tutorial simple** - Paso a paso para principiantes
 - **🔧 Script de instalación** - Todo automático  
-- **📁 Sitio web de ejemplo** - Para practicar
+- **� Script de diagnóstico** - Resuelve problemas comunes
+- **�📁 Sitio web de ejemplo** - Para practicar
 - **⚙️ Pipeline básico** - Listo para usar
+
+### 🛠️ Si algo no funciona:
+```bash
+# Ejecuta el diagnóstico automático
+./diagnostico.sh
+```
 
 ---
 

@@ -12,7 +12,17 @@ sudo apt update -qq
 
 # Instalar Java (necesario para Jenkins)
 echo "☕ Instalando Java..."
-sudo apt install -y fontconfig java-21-openjdk
+sudo apt install -y openjdk-17-jdk
+
+# Verificar instalación de Java
+echo "🔍 Verificando Java..."
+java_version=$(java -version 2>&1 | head -1)
+if [[ $java_version == *"openjdk"* ]]; then
+    echo "✅ Java instalado correctamente: $java_version"
+else
+    echo "❌ Error instalando Java"
+    exit 1
+fi
 
 # Instalar Jenkins
 echo "🔧 Instalando Jenkins..."
@@ -31,6 +41,32 @@ sudo systemctl start jenkins
 sudo systemctl start nginx
 sudo systemctl enable jenkins
 sudo systemctl enable nginx
+
+# Esperar a que Jenkins esté completamente iniciado
+echo "⏳ Esperando a que Jenkins esté listo..."
+max_attempts=60
+attempt=1
+
+while [ $attempt -le $max_attempts ]; do
+    if sudo systemctl is-active --quiet jenkins && curl -s http://localhost:8080 > /dev/null 2>&1; then
+        echo "✅ Jenkins está corriendo y respondiendo"
+        break
+    else
+        echo "⏳ Intento $attempt/$max_attempts - Jenkins iniciando..."
+        sleep 5
+        attempt=$((attempt + 1))
+    fi
+done
+
+if [ $attempt -gt $max_attempts ]; then
+    echo "❌ Jenkins no inició correctamente después de 5 minutos"
+    echo "🔍 Verificando logs de Jenkins..."
+    sudo journalctl -u jenkins --no-pager -l | tail -20
+    echo ""
+    echo "🔧 Intentando reiniciar Jenkins..."
+    sudo systemctl restart jenkins
+    sleep 30
+fi
 
 # Configurar firewall
 echo "🔥 Configurando accesos..."
@@ -68,12 +104,55 @@ sudo systemctl reload nginx
 
 # Mostrar información final
 echo ""
+echo "🔍 Verificando instalación..."
+
+# Verificar Jenkins
+if curl -s http://localhost:8080 > /dev/null 2>&1; then
+    echo "✅ Jenkins está funcionando correctamente"
+else
+    echo "⚠️ Jenkins puede no estar completamente listo"
+    echo "🔧 Verifica con: sudo systemctl status jenkins"
+fi
+
+# Verificar Nginx
+if curl -s http://localhost > /dev/null 2>&1; then
+    echo "✅ Nginx está funcionando correctamente"
+else
+    echo "⚠️ Nginx puede tener problemas"
+    echo "🔧 Verifica con: sudo systemctl status nginx"
+fi
+
+echo ""
 echo "🎉 ¡INSTALACIÓN COMPLETADA!"
 echo ""
-echo "🌐 Jenkins: http://localhost:8080"
-echo "🌐 Tu sitio: http://localhost"
+
+# Mostrar URLs con IP si estamos en Cloud Shell
+if [[ -n "$CLOUD_SHELL" ]]; then
+    EXTERNAL_IP=$(curl -s ifconfig.me 2>/dev/null || echo "localhost")
+    SAFE_IP=$(echo $EXTERNAL_IP | tr '.' '-')
+    echo "🌐 Jenkins (Cloud Shell): https://8080-${SAFE_IP}-8080.googleusercontent.com"
+    echo "🌐 Tu sitio (Cloud Shell): https://80-${SAFE_IP}-80.googleusercontent.com"
+    echo "💡 O usa Web Preview en Cloud Shell:"
+    echo "   • Jenkins: Web Preview → Preview on port 8080"
+    echo "   • Tu sitio: Web Preview → Preview on port 80"
+else
+    echo "🌐 Jenkins: http://localhost:8080"
+    echo "🌐 Tu sitio: http://localhost"
+fi
+
 echo ""
 echo "🔑 Contraseña de Jenkins:"
-sudo cat /var/lib/jenkins/secrets/initialAdminPassword
+if [ -f /var/lib/jenkins/secrets/initialAdminPassword ]; then
+    sudo cat /var/lib/jenkins/secrets/initialAdminPassword
+else
+    echo "⚠️ Archivo de contraseña no encontrado. Jenkins puede estar iniciando..."
+    echo "� Espera 2-3 minutos y ejecuta:"
+    echo "   sudo cat /var/lib/jenkins/secrets/initialAdminPassword"
+fi
 echo ""
-echo "💡 ¡Sigue el tutorial.md para continuar!"
+echo "�💡 ¡Sigue el tutorial.md para continuar!"
+echo ""
+echo "🛠️ Comandos útiles:"
+echo "   • Ver estado Jenkins: sudo systemctl status jenkins"
+echo "   • Ver logs Jenkins: sudo journalctl -u jenkins -f"
+echo "   • Reiniciar Jenkins: sudo systemctl restart jenkins"
