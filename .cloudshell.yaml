@@ -1,0 +1,37 @@
+# Google Cloud Shell configuration para Jenkins CI/CD Practice
+# Este archivo configura el comportamiento de Cloud Shell para el tutorial de Jenkins
+
+# Tutorial que se abrirá automáticamente
+cloudshell_tutorial:
+  path: tutorial.md
+
+# Configuraciones adicionales
+environment:
+  # Variables de entorno útiles para Jenkins
+  JENKINS_HOME: "/var/lib/jenkins"
+  JENKINS_USER: "devops-admin"
+  JENKINS_PASS: "DevOps2024!"
+
+# Comandos que se ejecutarán al iniciar
+pre_requisites:
+  - title: "Verificar sistema"
+    description: "Verificamos que el sistema esté listo para Jenkins"
+    command: "uname -a && free -h && df -h"
+  
+  - title: "Verificar Git"  
+    description: "Verificamos que Git esté disponible"
+    command: "git --version"
+    
+  - title: "Verificar conectividad"
+    description: "Verificamos conectividad a internet"
+    command: "ping -c 3 google.com"
+
+# Configuración del workspace
+workspace:
+  # Archivos que se mostrarán en el explorador
+  open_files:
+    - "tutorial.md"
+    - "README-JENKINS.md"
+    - "GUIA-PASO-A-PASO.md"
+    - "validate-environment.sh"
+    - "install-jenkins.sh"
