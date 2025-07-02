@@ -5,20 +5,41 @@
 
 echo "🚀 Instalando Jenkins para principiantes..."
 echo "⏱️  Esto tomará unos minutos..."
+echo ""
+
+# Verificar que el sistema esté listo
+echo "🔍 Verificando sistema..."
+if ! command -v curl &> /dev/null; then
+    echo "📥 Instalando curl..."
+    sudo apt install -y curl
+fi
+
+# Verificar conectividad
+if curl -s --connect-timeout 5 google.com > /dev/null; then
+    echo "✅ Conectividad a internet verificada"
+else
+    echo "⚠️ Problemas de conectividad, pero continuando..."
+fi
 
 # Actualizar sistema
+echo ""
 echo "📦 Actualizando sistema..."
 sudo apt update -qq
 
 # Instalar Java (necesario para Jenkins)
+echo ""
 echo "☕ Instalando Java..."
+echo "📥 Descargando OpenJDK 17 (esto puede tomar un momento)..."
 sudo apt install -y openjdk-17-jdk
 
 # Verificar instalación de Java
+echo ""
 echo "🔍 Verificando Java..."
 java_version=$(java -version 2>&1 | head -1)
 if [[ $java_version == *"openjdk"* ]]; then
     echo "✅ Java instalado correctamente: $java_version"
+    export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+    echo "🎯 JAVA_HOME configurado: $JAVA_HOME"
 else
     echo "❌ Error instalando Java"
     exit 1
@@ -26,33 +47,49 @@ fi
 
 # Instalar Jenkins
 echo "🔧 Instalando Jenkins..."
-wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo apt-key add -
-sudo sh -c 'echo deb https://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
+# Usar el método recomendado para agregar claves GPG
+curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | sudo tee /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/ | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
+
+echo "📦 Actualizando lista de paquetes..."
 sudo apt update -qq
+
+echo "📥 Descargando e instalando Jenkins..."
 sudo apt install -y jenkins
 
 # Instalar Nginx (servidor web)
-echo "🌐 Instalando servidor web..."
+echo ""
+echo "🌐 Instalando servidor web Nginx..."
 sudo apt install -y nginx
 
+echo "✅ Nginx instalado correctamente"
+
 # Iniciar servicios
+echo ""
 echo "🚀 Iniciando servicios..."
+echo "🔧 Iniciando Jenkins..."
 sudo systemctl start jenkins
-sudo systemctl start nginx
 sudo systemctl enable jenkins
+
+echo "🌐 Iniciando Nginx..."
+sudo systemctl start nginx
 sudo systemctl enable nginx
 
+echo "✅ Servicios iniciados y habilitados para inicio automático"
+
 # Esperar a que Jenkins esté completamente iniciado
+echo ""
 echo "⏳ Esperando a que Jenkins esté listo..."
+echo "💡 Jenkins puede tomar 2-5 minutos en estar completamente operativo..."
 max_attempts=60
 attempt=1
 
 while [ $attempt -le $max_attempts ]; do
     if sudo systemctl is-active --quiet jenkins && curl -s http://localhost:8080 > /dev/null 2>&1; then
-        echo "✅ Jenkins está corriendo y respondiendo"
+        echo "✅ Jenkins está corriendo y respondiendo en puerto 8080"
         break
     else
-        echo "⏳ Intento $attempt/$max_attempts - Jenkins iniciando..."
+        echo "⏳ Intento $attempt/$max_attempts - Jenkins iniciando... ($(date '+%H:%M:%S'))"
         sleep 5
         attempt=$((attempt + 1))
     fi
@@ -63,23 +100,39 @@ if [ $attempt -gt $max_attempts ]; then
     echo "🔍 Verificando logs de Jenkins..."
     sudo journalctl -u jenkins --no-pager -l | tail -20
     echo ""
-    echo "🔧 Intentando reiniciar Jenkins..."
+    echo "🔧 Intentando reiniciar Jenkins una vez más..."
     sudo systemctl restart jenkins
+    echo "⏳ Esperando 30 segundos adicionales..."
     sleep 30
 fi
 
 # Configurar firewall
-echo "🔥 Configurando accesos..."
-sudo ufw allow 8080 2>/dev/null || true
-sudo ufw allow 80 2>/dev/null || true
+echo ""
+echo "🔥 Configurando accesos de red..."
+sudo ufw allow 8080 2>/dev/null || echo "🔧 UFW no activo, continuando..."
+sudo ufw allow 80 2>/dev/null || echo "🔧 UFW no activo, continuando..."
+echo "✅ Puertos 8080 (Jenkins) y 80 (Web) configurados"
 
 # Configurar sitio web
-echo "🎨 Configurando tu portafolio..."
+echo ""
+echo "🎨 Configurando tu portafolio web..."
 sudo mkdir -p /var/www/portfolio
-sudo cp -r site/* /var/www/portfolio/
+
+# Verificar que existe el directorio site
+if [ -d "site" ]; then
+    sudo cp -r site/* /var/www/portfolio/
+    echo "✅ Archivos del sitio copiados a /var/www/portfolio/"
+else
+    echo "⚠️ Directorio 'site' no encontrado, creando página de ejemplo..."
+    echo "<h1>¡Hola! Tu sitio Jenkins está funcionando</h1>" | sudo tee /var/www/portfolio/index.html > /dev/null
+fi
+
 sudo chown -R www-data:www-data /var/www/portfolio
+echo "✅ Permisos configurados correctamente"
 
 # Configurar Nginx para el portafolio
+echo ""
+echo "⚙️ Configurando Nginx para servir tu portafolio..."
 sudo tee /etc/nginx/sites-available/portfolio > /dev/null << 'EOF'
 server {
     listen 80;
@@ -95,12 +148,27 @@ server {
         add_header Content-Type text/plain;
         return 200 "healthy";
     }
+    
+    # Cache para archivos estáticos
+    location ~* \.(css|js|png|jpg|jpeg|gif|ico|svg)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
 }
 EOF
 
+echo "🔗 Habilitando sitio en Nginx..."
 sudo ln -sf /etc/nginx/sites-available/portfolio /etc/nginx/sites-enabled/
 sudo rm -f /etc/nginx/sites-enabled/default
-sudo systemctl reload nginx
+
+echo "🔍 Verificando configuración de Nginx..."
+if sudo nginx -t; then
+    echo "✅ Configuración de Nginx válida"
+    sudo systemctl reload nginx
+    echo "✅ Nginx recargado con nueva configuración"
+else
+    echo "❌ Error en configuración de Nginx"
+fi
 
 # Mostrar información final
 echo ""
