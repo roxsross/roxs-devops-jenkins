@@ -12,7 +12,7 @@ pipeline {
         stage('🔍 Verificar Archivos') {
             steps {
                 echo '🔍 Verificando que tenemos los archivos...'
-                sh 'wget -q https://github.com/roxsross/devops-static-web/raw/portafolio-web/portafolio-web.zip'
+                sh 'curl -sL https://github.com/roxsross/devops-static-web/raw/portafolio-web/portafolio-web.zip -o portafolio-web.zip'
                 sh 'unzip -q portafolio-web.zip'
                 sh 'ls -la'
             }
