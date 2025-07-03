@@ -65,7 +65,7 @@ Usa los mismos comandos de arriba.
 2. En **"Definition"** selecciona: `Pipeline script from SCM`
 3. En **"SCM"** selecciona: `Git`
 4. En **"Repository URL"** pon: `https://github.com/roxsross/roxs-devops-jenkins.git`
-5. En **"Branch"** pon: `*/main`
+5. En **"Branch"** pon: `*/master`
 6. **Guarda**
 
 ---

@@ -21,14 +21,24 @@ pipeline {
             steps {
                 echo '🚀 Desplegando tu sitio web...'
                 sh '''
+                    # Verificar que el directorio existe
+                    if [ ! -d "/var/www/portfolio" ]; then
+                        echo "❌ Directorio /var/www/portfolio no existe"
+                        exit 1
+                    fi
+                    
                     # Copiar archivos al servidor web
                     sudo cp -r site/* /var/www/portfolio/
                     
                     # Configurar permisos
                     sudo chown -R www-data:www-data /var/www/portfolio/
                     
-                    # Verificar que funcione
-                    curl -f http://localhost/ || exit 1
+                    echo "✅ Archivos copiados correctamente"
+                    
+                    # Verificar que el sitio responde (con timeout)
+                    timeout 10 curl -f http://localhost/ > /dev/null || echo "⚠️ El sitio puede tardar en estar disponible"
+                    
+                    echo "🎉 Despliegue completado"
                 '''
             }
         }

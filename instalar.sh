@@ -8,8 +8,7 @@ echo "⏱️  Esto tomará unos minutos..."
 echo ""
 
 # Verificar que el sistema esté listo
-echo "🔍 Verificaecho ""
-echo "💡 ¡Sigue el tutorial.md para continuar!"o sistema..."
+echo "🔍 Verificando sistema..."
 if ! command -v curl &> /dev/null; then
     echo "📥 Instalando curl..."
     sudo apt install -y curl
@@ -47,6 +46,7 @@ else
 fi
 
 # Instalar Jenkins
+echo ""
 echo "🔧 Instalando Jenkins..."
 # Usar el método recomendado para agregar claves GPG
 curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | sudo tee /usr/share/keyrings/jenkins-keyring.asc > /dev/null
@@ -58,16 +58,18 @@ sudo apt update -qq
 echo "📥 Descargando e instalando Jenkins..."
 sudo apt install -y jenkins
 
+# Configurar permisos sudo para Jenkins (para pipelines)
+echo ""
+echo "🔐 Configurando permisos para Jenkins..."
+echo "jenkins ALL=(ALL) NOPASSWD: /bin/cp, /bin/chown, /usr/sbin/service, /bin/systemctl" | sudo tee /etc/sudoers.d/jenkins > /dev/null
+echo "✅ Permisos configurados para que Jenkins pueda desplegar archivos"
+
 # Instalar Nginx (servidor web)
 echo ""
 echo "🌐 Instalando servidor web Nginx..."
 sudo apt install -y nginx
 
 echo "✅ Nginx instalado correctamente"
-
-# Iniciar servicios
-echo ""
-echo "🚀 Iniciando servicios..."
 
 # Detectar sistema de init
 echo ""
@@ -80,6 +82,9 @@ else
     INIT_SYSTEM="sysv"
 fi
 
+# Iniciar servicios
+echo ""
+echo "🚀 Iniciando servicios..."
 echo "🔧 Iniciando Jenkins..."
 if [ "$INIT_SYSTEM" = "systemd" ]; then
     sudo systemctl start jenkins
@@ -231,7 +236,11 @@ if curl -s http://localhost:8080 > /dev/null 2>&1; then
     echo "✅ Jenkins está funcionando correctamente"
 else
     echo "⚠️ Jenkins puede no estar completamente listo"
-    echo "🔧 Verifica con: sudo systemctl status jenkins"
+    if [ "$INIT_SYSTEM" = "systemd" ]; then
+        echo "🔧 Verifica con: sudo systemctl status jenkins"
+    else
+        echo "🔧 Verifica con: sudo service jenkins status"
+    fi
 fi
 
 # Verificar Nginx
@@ -239,7 +248,11 @@ if curl -s http://localhost > /dev/null 2>&1; then
     echo "✅ Nginx está funcionando correctamente"
 else
     echo "⚠️ Nginx puede tener problemas"
-    echo "🔧 Verifica con: sudo systemctl status nginx"
+    if [ "$INIT_SYSTEM" = "systemd" ]; then
+        echo "🔧 Verifica con: sudo systemctl status nginx"
+    else
+        echo "🔧 Verifica con: sudo service nginx status"
+    fi
 fi
 
 echo ""
@@ -266,11 +279,12 @@ if [ -f /var/lib/jenkins/secrets/initialAdminPassword ]; then
     sudo cat /var/lib/jenkins/secrets/initialAdminPassword
 else
     echo "⚠️ Archivo de contraseña no encontrado. Jenkins puede estar iniciando..."
-    echo "� Espera 2-3 minutos y ejecuta:"
+    echo "💡 Espera 2-3 minutos y ejecuta:"
     echo "   sudo cat /var/lib/jenkins/secrets/initialAdminPassword"
 fi
+
 echo ""
-echo "echo "�💡 ¡Sigue el tutorial.md para continuar!"
+echo "💡 ¡Sigue el tutorial.md para continuar!"
 echo ""
 echo "🛠️ Comandos útiles:"
 if [ "$INIT_SYSTEM" = "systemd" ]; then
