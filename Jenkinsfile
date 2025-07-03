@@ -12,9 +12,26 @@ pipeline {
         stage('🔍 Verificar Archivos') {
             steps {
                 echo '🔍 Verificando que tenemos los archivos...'
-                sh 'curl -sL https://github.com/roxsross/devops-static-web/raw/portafolio-web/portafolio-web.zip -o portafolio-web.zip'
-                sh 'unzip -q portafolio-web.zip'
-                sh 'ls -la'
+                sh '''
+                    # Descargar el portafolio web desde el repositorio externo
+                    curl -sL https://github.com/roxsross/devops-static-web/raw/portafolio-web/portafolio-web.zip -o portafolio-web.zip
+                    
+                    # Crear directorio temporal para extraer
+                    mkdir -p temp-extract
+                    cd temp-extract
+                    
+                    # Extraer sin preguntas (sobrescribir automáticamente)
+                    unzip -o ../portafolio-web.zip
+                    
+                    # Volver al directorio principal y mover archivos
+                    cd ..
+                    mv temp-extract/* ./ 2>/dev/null || true
+                    rm -rf temp-extract portafolio-web.zip
+                    
+                    # Mostrar archivos disponibles
+                    echo "📁 Archivos descargados:"
+                    ls -la
+                '''
             }
         }
         
@@ -29,11 +46,36 @@ pipeline {
                         exit 1
                     fi
                     
+                    # Verificar permisos sudo (con mensaje claro si falla)
+                    if ! sudo -n true 2>/dev/null; then
+                        echo "❌ Jenkins no tiene permisos sudo configurados"
+                        echo "💡 Ejecuta en el servidor: sudo ./arreglar-permisos.sh"
+                        echo "💡 O manualmente: echo 'jenkins ALL=(ALL) NOPASSWD: /bin/cp, /bin/chown' | sudo tee /etc/sudoers.d/jenkins"
+                        exit 1
+                    fi
+                    
                     echo "✅ Permisos sudo verificados"
+                    
+                    # Buscar archivos HTML para copiar
+                    echo "🔍 Buscando archivos web..."
+                    if [ -d "portafolio-web" ]; then
+                        SOURCE_DIR="portafolio-web"
+                    elif [ -f "index.html" ]; then
+                        SOURCE_DIR="."
+                    elif [ -d "site" ]; then
+                        SOURCE_DIR="site"
+                    else
+                        echo "❌ No se encontraron archivos web para desplegar"
+                        echo "📁 Archivos disponibles:"
+                        ls -la
+                        exit 1
+                    fi
+                    
+                    echo "📁 Usando archivos de: $SOURCE_DIR"
                     
                     # Copiar archivos al servidor web
                     echo "📁 Copiando archivos..."
-                    sudo cp -r portafolio-web/* /var/www/portfolio/
+                    sudo cp -r $SOURCE_DIR/* /var/www/portfolio/
                     
                     # Configurar permisos
                     echo "🔐 Configurando permisos..."
