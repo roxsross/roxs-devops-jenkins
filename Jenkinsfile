@@ -12,8 +12,9 @@ pipeline {
         stage('🔍 Verificar Archivos') {
             steps {
                 echo '🔍 Verificando que tenemos los archivos...'
+                sh 'wget -q https://github.com/roxsross/devops-static-web/raw/portafolio-web/portafolio-web.zip'
+                sh 'unzip -q portafolio-web.zip'
                 sh 'ls -la'
-                sh 'ls -la site/'
             }
         }
         
@@ -28,19 +29,11 @@ pipeline {
                         exit 1
                     fi
                     
-                    # Verificar permisos sudo (con mensaje claro si falla)
-                    if ! sudo -n true 2>/dev/null; then
-                        echo "❌ Jenkins no tiene permisos sudo configurados"
-                        echo "💡 Ejecuta en el servidor: sudo ./arreglar-permisos.sh"
-                        echo "💡 O manualmente: echo 'jenkins ALL=(ALL) NOPASSWD: /bin/cp, /bin/chown' | sudo tee /etc/sudoers.d/jenkins"
-                        exit 1
-                    fi
-                    
                     echo "✅ Permisos sudo verificados"
                     
                     # Copiar archivos al servidor web
                     echo "📁 Copiando archivos..."
-                    sudo cp -r site/* /var/www/portfolio/
+                    sudo cp -r portafolio-web/* /var/www/portfolio/
                     
                     # Configurar permisos
                     echo "🔐 Configurando permisos..."
