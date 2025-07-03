@@ -52,6 +52,34 @@ Usa los mismos comandos de arriba.
 
 ---
 
+## 🌊 Paso 2.5: Habilitar Blue Ocean (Interfaz Moderna - OPCIONAL)
+
+Blue Ocean es la interfaz moderna y visual de Jenkins. ¡Te encantará!
+
+### 🔧 Instalar Blue Ocean:
+1. **En Jenkins** → Ve a **"Administrar Jenkins"**
+2. **Clic en "Administrar Plugins"**
+3. **Pestaña "Disponibles"**
+4. **Busca**: `Blue Ocean`
+5. **Marca la casilla** de "Blue Ocean"
+6. **Clic en "Instalar sin reiniciar"**
+7. **Espera 2-3 minutos** ⏳
+
+### 🎨 Usar Blue Ocean:
+1. **Ve a la página principal** de Jenkins
+2. **Verás un botón azul**: **"Abrir Blue Ocean"**
+3. **¡Clic y disfruta** la interfaz moderna!
+
+> 💡 **¿Qué es Blue Ocean?**
+> - 🎨 Interfaz mucho más bonita
+> - 📊 Visualización clara de pipelines
+> - 🚀 Experiencia más moderna
+> - 📱 Mejor en móviles
+
+**¡Blue Ocean hace que Jenkins se vea espectacular!** Puedes usar cualquiera de las dos interfaces.
+
+---
+
 ## 🏗️ Paso 3: Crear tu primer Pipeline
 
 ### En Jenkins:
@@ -75,6 +103,11 @@ Usa los mismos comandos de arriba.
 1. **Clic en "Construir ahora"**
 2. **Ve los logs**: Clic en el número del build → "Console Output"
 3. **¡Espera a que termine!** (2-3 minutos)
+
+> 💡 **¿Instalaste Blue Ocean?** También puedes ver tu pipeline en la interfaz moderna:
+> - **Clic en "Abrir Blue Ocean"** (botón azul)
+> - **Selecciona tu pipeline** `mi-primer-pipeline`
+> - **¡Disfruta la vista visual!** 🎨
 
 ---
 
@@ -168,10 +201,12 @@ Has creado tu primer sistema de **CI/CD** (Integración y Despliegue Continuo).
 - ✅ Los conceptos básicos de DevOps
 
 ### 🚀 ¿Qué sigue?
-- 🎨 Personaliza tu sitio web
+- � **Blue Ocean**: Si no lo instalaste, ¡hazlo! La interfaz es increíble
+- �🎨 Personaliza tu sitio web
 - 🔗 Conecta tu propio repositorio de GitHub
 - 📱 Agrega notificaciones
 - 🧪 Agrega tests automáticos
+- 📊 Explora las métricas en Blue Ocean
 
 ---
 
