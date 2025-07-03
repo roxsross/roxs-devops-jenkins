@@ -1,10 +1,6 @@
-# 🚀 Jenkins para Principiant## 📚 ¿Qué incluye?
+# 🚀 Jenkins para Principiantes
 
-- **📖 Tutorial simple** - Paso a paso para principiantes
-- **🔧 Script de instalación** - Todo automático  
-- **🔍 Script de diagnóstico** - Resuelve problemas comunes
-- **📁 Sitio web de ejemplo** - Para practicar
-- **⚙️ Pipeline básico** - Listo para usarrende Jenkins creando tu primer pipeline automático!
+¡Aprende Jenkins creando tu primer pipeline automático!
 
 ## ✨ ¿Qué vas a hacer?
 
@@ -35,8 +31,8 @@ sudo ./instalar.sh
 
 - **📖 Tutorial simple** - Paso a paso para principiantes
 - **🔧 Script de instalación** - Todo automático  
-- **� Script de diagnóstico** - Resuelve problemas comunes
-- **�📁 Sitio web de ejemplo** - Para practicar
+- **🔍 Script de diagnóstico** - Resuelve problemas comunes
+- **📁 Sitio web de ejemplo** - Para practicar
 - **⚙️ Pipeline básico** - Listo para usar
 
 ### 🛠️ Si algo no funciona:
@@ -45,7 +41,7 @@ sudo ./instalar.sh
 ./diagnostico.sh
 
 # Si el pipeline falla por permisos sudo
-./arreglar-permisos.sh
+sudo ./arreglar-permisos.sh
 ```
 
 ### 🔧 Compatibilidad total:
