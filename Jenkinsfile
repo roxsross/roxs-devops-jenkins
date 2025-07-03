@@ -24,19 +24,37 @@ pipeline {
                     # Verificar que el directorio existe
                     if [ ! -d "/var/www/portfolio" ]; then
                         echo "❌ Directorio /var/www/portfolio no existe"
+                        echo "💡 Ejecuta: sudo mkdir -p /var/www/portfolio && sudo chown -R www-data:www-data /var/www/portfolio"
                         exit 1
                     fi
                     
+                    # Verificar permisos sudo (con mensaje claro si falla)
+                    if ! sudo -n true 2>/dev/null; then
+                        echo "❌ Jenkins no tiene permisos sudo configurados"
+                        echo "💡 Ejecuta en el servidor: sudo ./arreglar-permisos.sh"
+                        echo "💡 O manualmente: echo 'jenkins ALL=(ALL) NOPASSWD: /bin/cp, /bin/chown' | sudo tee /etc/sudoers.d/jenkins"
+                        exit 1
+                    fi
+                    
+                    echo "✅ Permisos sudo verificados"
+                    
                     # Copiar archivos al servidor web
+                    echo "📁 Copiando archivos..."
                     sudo cp -r site/* /var/www/portfolio/
                     
                     # Configurar permisos
+                    echo "🔐 Configurando permisos..."
                     sudo chown -R www-data:www-data /var/www/portfolio/
                     
                     echo "✅ Archivos copiados correctamente"
                     
                     # Verificar que el sitio responde (con timeout)
-                    timeout 10 curl -f http://localhost/ > /dev/null || echo "⚠️ El sitio puede tardar en estar disponible"
+                    echo "🌐 Verificando sitio web..."
+                    if timeout 10 curl -f http://localhost/ > /dev/null 2>&1; then
+                        echo "✅ Sitio web responde correctamente"
+                    else
+                        echo "⚠️ El sitio puede tardar en estar disponible"
+                    fi
                     
                     echo "🎉 Despliegue completado"
                 '''
@@ -47,9 +65,13 @@ pipeline {
     post {
         success {
             echo '🎉 ¡Éxito! Tu sitio web está desplegado'
+            echo '🌐 Visita: http://localhost para ver tu sitio'
         }
         failure {
-            echo '❌ Algo salió mal. Revisa los logs arriba.'
+            echo '❌ Pipeline falló. Posibles soluciones:'
+            echo '💡 Si fue error de permisos sudo: ejecuta "./arreglar-permisos.sh"'
+            echo '💡 Para diagnóstico completo: ejecuta "./diagnostico.sh"'
+            echo '💡 Verifica que Jenkins esté corriendo: sudo service jenkins status'
         }
     }
 }
