@@ -2,12 +2,23 @@
 
 # 🚀 Jenkins - Instalación Simple para Principiantes
 # Un solo script que hace todo automáticamente
+# Optimizado para Google Cloud Shell y contenedores
 
 echo "🚀 Instalando Jenkins para principiantes..."
 echo "⏱️  Esto tomará unos minutos..."
 echo ""
 
+# Detectar si estamos en Cloud Shell
+if [[ -n "$CLOUD_SHELL" ]] || [[ "$USER" == "naranjax" ]] || [[ -n "$GOOGLE_CLOUD_PROJECT" ]]; then
+    echo "☁️ Google Cloud Shell detectado - Usando configuración optimizada"
+    IS_CLOUD_SHELL=true
+else
+    echo "🖥️ Sistema local/VM detectado"
+    IS_CLOUD_SHELL=false
+fi
+
 # Verificar que el sistema esté listo
+echo ""
 echo "🔍 Verificando sistema..."
 if ! command -v curl &> /dev/null; then
     echo "📥 Instalando curl..."
@@ -61,7 +72,34 @@ sudo apt install -y jenkins
 # Configurar permisos sudo para Jenkins (para pipelines)
 echo ""
 echo "🔐 Configurando permisos para Jenkins..."
-echo "jenkins ALL=(ALL) NOPASSWD: /bin/cp, /bin/chown, /usr/sbin/service, /bin/systemctl" | sudo tee /etc/sudoers.d/jenkins > /dev/null
+
+# En Cloud Shell, configurar permisos específicos más restrictivos
+if [ "$IS_CLOUD_SHELL" = true ]; then
+    echo "☁️ Configurando permisos optimizados para Cloud Shell..."
+    echo "jenkins ALL=(ALL) NOPASSWD: /bin/cp, /bin/chown, /usr/sbin/service, /bin/systemctl, /usr/sbin/nginx, /bin/mkdir, /bin/rm, /usr/bin/unzip, /bin/mv" | sudo tee /etc/sudoers.d/jenkins > /dev/null
+else
+    echo "jenkins ALL=(ALL) NOPASSWD: /bin/cp, /bin/chown, /usr/sbin/service, /bin/systemctl, /usr/sbin/nginx, /bin/mkdir, /bin/rm, /usr/bin/unzip, /bin/mv" | sudo tee /etc/sudoers.d/jenkins > /dev/null
+fi
+
+# Verificar que el archivo se creó correctamente
+if [ -f /etc/sudoers.d/jenkins ]; then
+    echo "✅ Archivo de permisos creado: /etc/sudoers.d/jenkins"
+    
+    # Verificar sintaxis del archivo sudoers
+    if sudo visudo -c -f /etc/sudoers.d/jenkins &>/dev/null; then
+        echo "✅ Configuración de sudoers válida"
+        # En Cloud Shell, también agregar el usuario jenkins al grupo www-data para mejor compatibilidad
+        if [ "$IS_CLOUD_SHELL" = true ]; then
+            sudo usermod -a -G www-data jenkins 2>/dev/null || echo "💡 Grupo www-data configurado"
+        fi
+    else
+        echo "❌ Error en configuración de sudoers, eliminando archivo..."
+        sudo rm -f /etc/sudoers.d/jenkins
+    fi
+else
+    echo "❌ No se pudo crear el archivo de permisos"
+fi
+
 echo "✅ Permisos configurados para que Jenkins pueda desplegar archivos"
 
 # Instalar Nginx (servidor web)
@@ -108,8 +146,14 @@ echo "✅ Servicios iniciados y habilitados para inicio automático"
 # Esperar a que Jenkins esté completamente iniciado
 echo ""
 echo "⏳ Esperando a que Jenkins esté listo..."
-echo "💡 Jenkins puede tomar 2-5 minutos en estar completamente operativo..."
-max_attempts=60
+if [ "$IS_CLOUD_SHELL" = true ]; then
+    echo "☁️ En Cloud Shell, Jenkins puede tomar 3-7 minutos en estar operativo..."
+    max_attempts=84  # 7 minutos
+else
+    echo "💡 Jenkins puede tomar 2-5 minutos en estar completamente operativo..."
+    max_attempts=60  # 5 minutos
+fi
+
 attempt=1
 
 while [ $attempt -le $max_attempts ]; do
@@ -131,14 +175,19 @@ while [ $attempt -le $max_attempts ]; do
         echo "✅ Jenkins está corriendo y respondiendo en puerto 8080"
         break
     else
-        echo "⏳ Intento $attempt/$max_attempts - Jenkins iniciando... ($(date '+%H:%M:%S'))"
+        # Mostrar progreso cada 15 segundos para Cloud Shell
+        if [ "$IS_CLOUD_SHELL" = true ] && [ $((attempt % 3)) -eq 0 ]; then
+            echo "⏳ Intento $attempt/$max_attempts - Jenkins iniciando... ($(date '+%H:%M:%S'))"
+        elif [ "$IS_CLOUD_SHELL" = false ]; then
+            echo "⏳ Intento $attempt/$max_attempts - Jenkins iniciando... ($(date '+%H:%M:%S'))"
+        fi
         sleep 5
         attempt=$((attempt + 1))
     fi
 done
 
 if [ $attempt -gt $max_attempts ]; then
-    echo "❌ Jenkins no inició correctamente después de 5 minutos"
+    echo "❌ Jenkins no inició correctamente después del tiempo esperado"
     echo "🔍 Verificando estado de Jenkins..."
     
     if [ "$INIT_SYSTEM" = "systemd" ]; then
@@ -155,8 +204,14 @@ if [ $attempt -gt $max_attempts ]; then
     else
         sudo service jenkins restart
     fi
-    echo "⏳ Esperando 30 segundos adicionales..."
-    sleep 30
+    
+    if [ "$IS_CLOUD_SHELL" = true ]; then
+        echo "⏳ Esperando 60 segundos adicionales (Cloud Shell)..."
+        sleep 60
+    else
+        echo "⏳ Esperando 30 segundos adicionales..."
+        sleep 30
+    fi
 fi
 
 # Configurar firewall
@@ -260,14 +315,31 @@ echo "🎉 ¡INSTALACIÓN COMPLETADA!"
 echo ""
 
 # Mostrar URLs con IP si estamos en Cloud Shell
-if [[ -n "$CLOUD_SHELL" ]]; then
-    EXTERNAL_IP=$(curl -s ifconfig.me 2>/dev/null || echo "localhost")
-    SAFE_IP=$(echo $EXTERNAL_IP | tr '.' '-')
-    echo "🌐 Jenkins (Cloud Shell): https://8080-${SAFE_IP}-8080.googleusercontent.com"
-    echo "🌐 Tu sitio (Cloud Shell): https://80-${SAFE_IP}-80.googleusercontent.com"
-    echo "💡 O usa Web Preview en Cloud Shell:"
-    echo "   • Jenkins: Web Preview → Preview on port 8080"
-    echo "   • Tu sitio: Web Preview → Preview on port 80"
+if [ "$IS_CLOUD_SHELL" = true ]; then
+    echo "☁️ CLOUD SHELL - URLs de acceso:"
+    echo ""
+    echo "🌐 Jenkins:"
+    echo "   • Web Preview → Preview on port 8080"
+    echo "   • O abre el menú Cloud Shell y selecciona 'Web Preview' → 'Preview on port 8080'"
+    echo ""
+    echo "🌐 Tu sitio web:"
+    echo "   • Web Preview → Preview on port 80"
+    echo "   • O abre el menú Cloud Shell y selecciona 'Web Preview' → 'Preview on port 80'"
+    echo ""
+    echo "💡 También puedes usar estos enlaces directos (si están disponibles):"
+    
+    # Intentar obtener la URL de Cloud Shell
+    if [[ -n "$WEB_HOST" ]]; then
+        echo "   • Jenkins: https://${WEB_HOST}/proxy/8080/"
+        echo "   • Tu sitio: https://${WEB_HOST}/proxy/80/"
+    elif [[ -n "$CLOUD_SHELL_IP" ]]; then
+        echo "   • Jenkins: https://8080-${CLOUD_SHELL_IP}-8080.googleusercontent.com"
+        echo "   • Tu sitio: https://80-${CLOUD_SHELL_IP}-80.googleusercontent.com"
+    else
+        echo "   • Jenkins: https://8080-{tu-ip-cloud-shell}.googleusercontent.com"
+        echo "   • Tu sitio: https://80-{tu-ip-cloud-shell}.googleusercontent.com"
+        echo "   (Reemplaza {tu-ip-cloud-shell} con tu IP externa)"
+    fi
 else
     echo "🌐 Jenkins: http://localhost:8080"
     echo "🌐 Tu sitio: http://localhost"

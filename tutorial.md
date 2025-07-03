@@ -13,7 +13,22 @@
 
 ## 🚀 Paso 1: Instalar todo (¡súper fácil!)
 
-### En Google Cloud Shell:
+### ☁️ En Google Cloud Shell (Recomendado):
+```bash
+# Clona este proyecto
+git clone https://github.com/roxsross/roxs-devops-jenkins.git
+cd roxs-devops-jenkins
+
+# ¡Instala todo con un comando!
+sudo ./instalar.sh
+
+# Helper específico para Cloud Shell (opcional)
+./cloud-shell-helper.sh
+```
+
+> 💡 **El script está optimizado para Cloud Shell**: Detecta automáticamente Cloud Shell y configura permisos y timeouts específicos para un mejor rendimiento.
+
+### 🖥️ En tu propia computadora Linux:
 ```bash
 # Clona este proyecto
 git clone https://github.com/roxsross/roxs-devops-jenkins.git
@@ -25,22 +40,21 @@ sudo ./instalar.sh
 
 > 💡 **El script es inteligente**: Detecta automáticamente si tu sistema usa systemd (Ubuntu moderno) o SysV init (Cloud Shell, contenedores) y usa los comandos correctos.
 
-### En tu propia computadora Linux:
-Usa los mismos comandos de arriba.
-
 ⏱️ **Tiempo**: 5-10 minutos  
 
 ---
 
 ## 🌐 Paso 2: Abrir Jenkins
 
-### En Google Cloud Shell:
-- Haz clic en **"Web Preview"** → **"Preview on port 8080"**
+### ☁️ En Google Cloud Shell:
+1. Busca el menú **⋮** en la parte superior de Cloud Shell
+2. Haz clic en **"Web Preview"** → **"Preview on port 8080"**
+3. O usa el comando: `./cloud-shell-helper.sh` para ver todas las URLs
 
-### En tu computadora:
+### 🖥️ En tu computadora:
 - Abre: `http://localhost:8080`
 
-### Configurar Jenkins:
+### 🔧 Configurar Jenkins:
 1. **Copia la contraseña** que apareció al final de la instalación
 2. **Pégala** en Jenkins
 3. **Instala plugins sugeridos** (espera 5 minutos)
@@ -113,13 +127,17 @@ Blue Ocean es la interfaz moderna y visual de Jenkins. ¡Te encantará!
 
 ## 🌐 Paso 5: Ver tu sitio web
 
-### En Google Cloud Shell:
-- **Web Preview** → **"Preview on port 80"**
+### ☁️ En Google Cloud Shell:
+1. Busca el menú **⋮** en la parte superior de Cloud Shell
+2. Haz clic en **"Web Preview"** → **"Preview on port 80"**
+3. O ejecuta `./cloud-shell-helper.sh` para ver todas las URLs disponibles
 
-### En tu computadora:
+### 🖥️ En tu computadora:
 - Abre: `http://localhost`
 
 **¡Deberías ver tu página web funcionando!** 🎉
+
+> 💡 **En Cloud Shell**: Guarda las URLs que muestra `cloud-shell-helper.sh` para acceso rápido
 
 ---
 

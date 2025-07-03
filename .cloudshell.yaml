@@ -1,4 +1,4 @@
-# Tutorial Jenkins para Principiantes
+# Tutorial Jenkins para Principiantes - Optimizado para Cloud Shell
 cloudshell_tutorial:
   path: tutorial.md
 
@@ -8,5 +8,10 @@ workspace:
     - "tutorial.md"
     - "README.md"
     - "instalar.sh"
+    - "cloud-shell-helper.sh"
     - "diagnostico.sh"
     - "Jenkinsfile"
+
+# Configuración inicial
+cloudshell_open:
+  - url: "https://shell.cloud.google.com/cloudshell/editor?terminal=true&cloudshell_tutorial=tutorial.md"

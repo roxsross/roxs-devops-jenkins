@@ -13,11 +13,18 @@
 
 ## 🚀 ¡Empezar ahora!
 
-### 🌐 En Google Cloud Shell (Fácil):
+### ☁️ En Google Cloud Shell (Recomendado):
 
 [![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/roxsross/roxs-devops-jenkins.git&cloudshell_tutorial=tutorial.md)
 
-### 🖥️ En tu computadora:
+**O manualmente:**
+```bash
+git clone https://github.com/roxsross/roxs-devops-jenkins.git
+cd roxs-devops-jenkins
+sudo ./instalar.sh
+```
+
+### 🖥️ En tu computadora local:
 
 ```bash
 git clone https://github.com/roxsross/roxs-devops-jenkins.git
@@ -30,22 +37,29 @@ sudo ./instalar.sh
 ## 📚 ¿Qué incluye?
 
 - **📖 Tutorial simple** - Paso a paso para principiantes
-- **🔧 Script de instalación** - Todo automático  
+- **🔧 Script de instalación** - Todo automático y optimizado para Cloud Shell
+- **☁️ Helper de Cloud Shell** - URLs y configuración específica  
 - **🔍 Script de diagnóstico** - Resuelve problemas comunes
 - **📁 Sitio web de ejemplo** - Para practicar
 - **⚙️ Pipeline básico** - Listo para usar
 
-### 🛠️ Si algo no funciona:
+### 🛠️ Scripts útiles:
 ```bash
-# Ejecuta el diagnóstico automático
+# Verificación rápida de todo el sistema
+./verificar.sh
+
+# Diagnóstico completo si hay problemas
 ./diagnostico.sh
 
 # Si el pipeline falla por permisos sudo
 sudo ./arreglar-permisos.sh
+
+# Helper específico para Cloud Shell (URLs y configuración)
+./cloud-shell-helper.sh
 ```
 
 ### 🔧 Compatibilidad total:
-✅ **Google Cloud Shell** - Funciona perfecto  
+✅ **Google Cloud Shell** - Optimizado y probado  
 ✅ **Ubuntu/Debian** - Con systemd o SysV  
 ✅ **Contenedores Docker** - Sin systemd  
 ✅ **VMs en la nube** - AWS, Azure, GCP  
