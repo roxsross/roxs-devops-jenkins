@@ -70,12 +70,19 @@ sudo ./arreglar-permisos.sh
 ```
 
 ### 🔧 Compatibilidad total:
-✅ **Google Cloud Shell** - Optimizado y probado  
+✅ **Google Cloud Shell** - 100% optimizado y probado  
 ✅ **Ubuntu/Debian** - Con systemd o SysV  
 ✅ **Contenedores Docker** - Sin systemd  
 ✅ **VMs en la nube** - AWS, Azure, GCP  
 
 *Los scripts detectan automáticamente tu sistema y usan los comandos correctos*
+
+### ⚡ Solución rápida si el pipeline falla:
+Si tu primer pipeline falla por permisos (normal), simplemente ejecuta:
+```bash
+sudo ./arreglar-permisos.sh
+```
+Y vuelve a ejecutar el pipeline. ¡Solo necesitas hacerlo una vez!
 
 ---
 

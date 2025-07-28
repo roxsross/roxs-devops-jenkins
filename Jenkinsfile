@@ -51,12 +51,26 @@ pipeline {
                     if ! sudo -n true 2>/dev/null; then
                         echo "❌ Jenkins no tiene permisos sudo configurados"
                         echo ""
-                        echo "� PARA SOLUCIONARLO:"
-                        echo "1. Ejecuta en terminal: sudo ./arreglar-permisos.sh"
-                        echo "2. O manualmente ejecuta:"
-                        echo "   echo 'jenkins ALL=(ALL) NOPASSWD: /bin/cp, /bin/chown, /bin/rm, /usr/bin/unzip, /bin/mv' | sudo tee /etc/sudoers.d/jenkins"
-                        echo "   sudo visudo -c"
-                        echo "3. Luego reintenta el pipeline"
+                        echo "🔧 SOLUCIÓN RÁPIDA PARA CLOUD SHELL:"
+                        echo "======================================"
+                        echo ""
+                        echo "1️⃣ Abre una nueva terminal en Cloud Shell"
+                        echo "2️⃣ Ejecuta este comando:"
+                        echo ""
+                        echo "   sudo ./arreglar-permisos.sh"
+                        echo ""
+                        echo "3️⃣ Luego vuelve a Jenkins y ejecuta el pipeline otra vez"
+                        echo ""
+                        echo "💡 ALTERNATIVA MANUAL:"
+                        echo "======================"
+                        echo "Si prefieres hacerlo manualmente, ejecuta:"
+                        echo ""
+                        echo "echo 'jenkins ALL=(ALL) NOPASSWD: /bin/cp, /bin/chown, /bin/rm, /usr/bin/unzip, /bin/mv, /bin/chmod' | sudo tee /etc/sudoers.d/jenkins"
+                        echo "sudo visudo -c"
+                        echo ""
+                        echo "🌐 ACCESO A JENKINS:"
+                        echo "==================="
+                        echo "• En Cloud Shell: Web Preview → Preview on port 8080"
                         echo ""
                         exit 1
                     fi
@@ -146,18 +160,32 @@ pipeline {
             echo '   • Puedes modificar los archivos y ejecutar el pipeline otra vez'
         }
         failure {
-            echo '❌ Pipeline falló. Posibles soluciones:'
+            echo '❌ Pipeline falló - ¡Pero es fácil de arreglar!'
             echo ''
-            echo '� Si fue error de permisos sudo:'
-            echo '   1. Ejecuta: sudo ./arreglar-permisos.sh'
-            echo '   2. O manualmente: sudo echo "jenkins ALL=(ALL) NOPASSWD: /bin/cp, /bin/chown, /bin/rm, /usr/bin/unzip, /bin/mv" | sudo tee /etc/sudoers.d/jenkins'
+            echo '🔧 SOLUCIÓN PARA CLOUD SHELL:'
+            echo '============================='
             echo ''
-            echo '� Para diagnóstico completo:'
-            echo '   • Ejecuta: ./diagnostico.sh'
-            echo '   • Verifica Jenkins: sudo service jenkins status'
-            echo '   • Verifica Nginx: sudo service nginx status'
+            echo '1️⃣ Abre una nueva terminal en Cloud Shell'
+            echo '2️⃣ Navega al directorio del proyecto:'
+            echo '   cd roxs-devops-jenkins'
             echo ''
-            echo '💡 En Cloud Shell, puede ser necesario esperar más tiempo para que Jenkins esté listo'
+            echo '3️⃣ Ejecuta el script de permisos:'
+            echo '   sudo ./arreglar-permisos.sh'
+            echo ''
+            echo '4️⃣ Vuelve a Jenkins y ejecuta el pipeline otra vez'
+            echo ''
+            echo '🌐 ACCESO RÁPIDO:'
+            echo '================='
+            echo '• Jenkins: Web Preview → Preview on port 8080'
+            echo '• Tu sitio (después del pipeline): Web Preview → Preview on port 80'
+            echo ''
+            echo '🆘 SI NECESITAS AYUDA:'
+            echo '====================='
+            echo '• Diagnóstico completo: ./diagnostico.sh'
+            echo '• Estado de servicios: ./verificar.sh'
+            echo '• URLs específicas: ./cloud-shell-helper.sh'
+            echo ''
+            echo '💡 Este error es normal la primera vez - ¡solo necesitas configurar permisos una vez!'
         }
     }
 }
