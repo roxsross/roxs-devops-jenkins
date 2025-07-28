@@ -30,5 +30,5 @@ cloudshell_startup:
 ports:
   - port: 8080
     description: "Jenkins - Interfaz de administración"
-  - port: 80
-    description: "Sitio web desplegado"
+  - port: 8088
+    description: "Aplicación web - Portafolio desplegado"

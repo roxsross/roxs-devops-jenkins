@@ -1,0 +1,118 @@
+pipeline {
+    agent any
+    
+    stages {
+        stage('📥 Descargar Código') {
+            steps {
+                echo '📥 Descargando el código desde Git...'
+                checkout scm
+            }
+        }
+        
+        stage('🔍 Verificar Archivos') {
+            steps {
+                echo '🔍 Verificando que tenemos los archivos...'
+                sh '''
+                    echo "📁 Archivos en el workspace:"
+                    ls -la
+                    
+                    # Si existe el directorio site, usarlo
+                    if [ -d "site" ]; then
+                        echo "✅ Directorio 'site' encontrado"
+                        SOURCE_DIR="site"
+                    else
+                        echo "📥 Descargando portafolio web..."
+                        curl -sL https://github.com/roxsross/devops-static-web/raw/portafolio-web/portafolio-web.zip -o portafolio-web.zip
+                        
+                        mkdir -p temp-extract
+                        cd temp-extract
+                        unzip -o ../portafolio-web.zip
+                        cd ..
+                        mv temp-extract/* ./ 2>/dev/null || true
+                        rm -rf temp-extract portafolio-web.zip
+                        
+                        if [ -d "portafolio-web" ]; then
+                            SOURCE_DIR="portafolio-web"
+                        else
+                            SOURCE_DIR="."
+                        fi
+                    fi
+                    
+                    echo "📁 Usando archivos de: $SOURCE_DIR"
+                    echo "SOURCE_DIR=$SOURCE_DIR" > source_dir.env
+                '''
+            }
+        }
+        
+        stage('🚀 Desplegar Sitio Web') {
+            steps {
+                echo '🚀 Desplegando tu sitio web con Docker...'
+                sh '''
+                    # Leer el directorio fuente
+                    source source_dir.env
+                    
+                    echo "🔍 Desplegando desde: $SOURCE_DIR"
+                    
+                    # Limpiar destino
+                    rm -rf /var/www/portfolio/*
+                    
+                    # Copiar archivos
+                    if [ "$SOURCE_DIR" = "." ]; then
+                        # Copiar archivos HTML/CSS/JS del directorio actual
+                        cp *.html /var/www/portfolio/ 2>/dev/null || true
+                        cp *.css /var/www/portfolio/ 2>/dev/null || true
+                        cp *.js /var/www/portfolio/ 2>/dev/null || true
+                        cp -r images /var/www/portfolio/ 2>/dev/null || true
+                        cp -r css /var/www/portfolio/ 2>/dev/null || true
+                        cp -r js /var/www/portfolio/ 2>/dev/null || true
+                    else
+                        # Copiar todo el directorio
+                        cp -r $SOURCE_DIR/* /var/www/portfolio/
+                    fi
+                    
+                    echo "✅ Archivos copiados correctamente"
+                    echo "📁 Archivos en el sitio web:"
+                    ls -la /var/www/portfolio/ | head -10
+                    
+                    # Verificar que el sitio responde
+                    echo "🌐 Verificando sitio web..."
+                    sleep 2
+                    if curl -f http://localhost/ > /dev/null 2>&1; then
+                        echo "✅ Sitio web responde correctamente"
+                    else
+                        echo "⚠️ El sitio puede tardar en estar disponible"
+                    fi
+                    
+                    echo "🎉 Despliegue completado"
+                '''
+            }
+        }
+    }
+    
+    post {
+        success {
+            echo '🎉 ¡Éxito! Tu sitio web está desplegado'
+            echo ''
+            echo '🌐 Para ver tu sitio:'
+            echo '   • En Cloud Shell: Web Preview → Preview on port 80'
+            echo '   • En local: http://localhost'
+            echo ''
+            echo '💡 Tips:'
+            echo '   • Refresca la página si no ves cambios'
+            echo '   • Puedes modificar los archivos y ejecutar el pipeline otra vez'
+            echo '   • ¡No necesitas permisos sudo con Docker!'
+        }
+        failure {
+            echo '❌ Pipeline falló'
+            echo ''
+            echo '🔧 SOLUCIÓN:'
+            echo '• Verifica que Docker esté corriendo'
+            echo '• Revisa los logs para más detalles'
+            echo '• En Cloud Shell, Docker debería funcionar automáticamente'
+            echo ''
+            echo '🌐 ACCESO:'
+            echo '• Jenkins: Web Preview → Preview on port 8080'
+            echo '• Tu sitio: Web Preview → Preview on port 80'
+        }
+    }
+}

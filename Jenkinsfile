@@ -2,146 +2,51 @@ pipeline {
     agent any
     
     stages {
-        stage('📥 Descargar Código') {
+        stage('📥 Obtener Código') {
             steps {
-                echo '📥 Descargando el código desde Git...'
+                echo '📥 Obteniendo código del repositorio...'
                 checkout scm
             }
         }
         
-        stage('🔍 Verificar Archivos') {
+        stage('🔍 Verificar Portafolio') {
             steps {
-                echo '🔍 Verificando que tenemos los archivos...'
+                echo '🔍 Verificando directorio portafolio-web...'
                 sh '''
-                    # Descargar el portafolio web desde el repositorio externo
-                    curl -sL https://github.com/roxsross/devops-static-web/raw/portafolio-web/portafolio-web.zip -o portafolio-web.zip
-                    
-                    # Crear directorio temporal para extraer
-                    mkdir -p temp-extract
-                    cd temp-extract
-                    
-                    # Extraer sin preguntas (sobrescribir automáticamente)
-                    unzip -o ../portafolio-web.zip
-                    
-                    # Volver al directorio principal y mover archivos
-                    cd ..
-                    mv temp-extract/* ./ 2>/dev/null || true
-                    rm -rf temp-extract portafolio-web.zip
-                    
-                    # Mostrar archivos disponibles
-                    echo "📁 Archivos descargados:"
-                    ls -la
+                    if [ -d "portafolio-web" ]; then
+                        echo "✅ Directorio portafolio-web encontrado"
+                        echo "📁 Archivos del portafolio:"
+                        ls -la portafolio-web/ | head -10
+                    else
+                        echo "❌ Directorio portafolio-web no encontrado"
+                        echo "📁 Archivos disponibles:"
+                        ls -la
+                        exit 1
+                    fi
                 '''
             }
         }
         
-        stage('🚀 Desplegar Sitio Web') {
+        stage('🚀 Desplegar Aplicación') {
             steps {
-                echo '🚀 Desplegando tu sitio web...'
+                echo '🚀 Desplegando aplicación web...'
                 sh '''
-                    # Verificar que el directorio existe
-                    if [ ! -d "/var/www/portfolio" ]; then
-                        echo "❌ Directorio /var/www/portfolio no existe"
-                        echo "💡 Ejecuta: sudo mkdir -p /var/www/portfolio && sudo chown -R www-data:www-data /var/www/portfolio"
-                        exit 1
-                    fi
+                    echo "🐳 Desplegando con Docker Compose..."
                     
-                    # Verificar permisos sudo (con mensaje claro si falla)
-                    echo "🔐 Verificando permisos sudo..."
-                    if ! sudo -n true 2>/dev/null; then
-                        echo "❌ Jenkins no tiene permisos sudo configurados"
-                        echo ""
-                        echo "🔧 SOLUCIÓN RÁPIDA PARA CLOUD SHELL:"
-                        echo "======================================"
-                        echo ""
-                        echo "1️⃣ Abre una nueva terminal en Cloud Shell"
-                        echo "2️⃣ Ejecuta este comando:"
-                        echo ""
-                        echo "   sudo ./arreglar-permisos.sh"
-                        echo ""
-                        echo "3️⃣ Luego vuelve a Jenkins y ejecuta el pipeline otra vez"
-                        echo ""
-                        echo "💡 ALTERNATIVA MANUAL:"
-                        echo "======================"
-                        echo "Si prefieres hacerlo manualmente, ejecuta:"
-                        echo ""
-                        echo "echo 'jenkins ALL=(ALL) NOPASSWD: /bin/cp, /bin/chown, /bin/rm, /usr/bin/unzip, /bin/mv, /bin/chmod' | sudo tee /etc/sudoers.d/jenkins"
-                        echo "sudo visudo -c"
-                        echo ""
-                        echo "🌐 ACCESO A JENKINS:"
-                        echo "==================="
-                        echo "• En Cloud Shell: Web Preview → Preview on port 8080"
-                        echo ""
-                        exit 1
-                    fi
+                    # Reiniciar contenedor de la aplicación
+                    docker-compose restart web
                     
-                    echo "✅ Permisos sudo verificados"
+                    # Esperar a que esté lista
+                    echo "⏳ Esperando a que la aplicación esté lista..."
+                    sleep 5
                     
-                    # Buscar archivos HTML para copiar
-                    echo "🔍 Buscando archivos web..."
-                    if [ -d "portafolio-web" ]; then
-                        SOURCE_DIR="portafolio-web"
-                        echo "📁 Encontrado directorio: portafolio-web"
-                    elif [ -f "index.html" ]; then
-                        SOURCE_DIR="."
-                        echo "📁 Encontrado index.html en directorio actual"
-                    elif [ -d "site" ]; then
-                        SOURCE_DIR="site"
-                        echo "📁 Encontrado directorio: site"
+                    # Verificar que está funcionando
+                    if curl -f http://localhost:8088/health > /dev/null 2>&1; then
+                        echo "✅ Aplicación desplegada y funcionando en puerto 8088"
                     else
-                        echo "❌ No se encontraron archivos web para desplegar"
-                        echo "📁 Archivos disponibles:"
-                        ls -la
-                        echo ""
-                        echo "💡 Se esperaba encontrar:"
-                        echo "   • Un directorio 'portafolio-web' con archivos HTML"
-                        echo "   • Un archivo 'index.html' en el directorio actual"
-                        echo "   • Un directorio 'site' con archivos HTML"
-                        exit 1
+                        echo "⚠️ Aplicación puede tardar en estar lista"
+                        docker-compose logs web --tail 10
                     fi
-                    
-                    echo "📁 Usando archivos de: $SOURCE_DIR"
-                    echo "📁 Contenido a copiar:"
-                    ls -la $SOURCE_DIR/ | head -10
-                    
-                    # Limpiar destino antes de copiar (para evitar conflictos)
-                    echo "🧹 Limpiando directorio destino..."
-                    sudo rm -rf /var/www/portfolio/*
-                    
-                    # Copiar archivos al servidor web
-                    echo "📁 Copiando archivos..."
-                    if [ "$SOURCE_DIR" = "." ]; then
-                        # Si el directorio fuente es actual, copiar solo HTML/CSS/JS
-                        sudo cp *.html /var/www/portfolio/ 2>/dev/null || true
-                        sudo cp *.css /var/www/portfolio/ 2>/dev/null || true
-                        sudo cp *.js /var/www/portfolio/ 2>/dev/null || true
-                        sudo cp -r images /var/www/portfolio/ 2>/dev/null || true
-                        sudo cp -r css /var/www/portfolio/ 2>/dev/null || true
-                        sudo cp -r js /var/www/portfolio/ 2>/dev/null || true
-                    else
-                        sudo cp -r $SOURCE_DIR/* /var/www/portfolio/
-                    fi
-                    
-                    # Configurar permisos
-                    echo "🔐 Configurando permisos..."
-                    sudo chown -R www-data:www-data /var/www/portfolio/
-                    
-                    echo "✅ Archivos copiados correctamente"
-                    echo "📁 Archivos en el sitio web:"
-                    sudo ls -la /var/www/portfolio/ | head -10
-                    
-                    # Verificar que el sitio responde (con timeout)
-                    echo "🌐 Verificando sitio web..."
-                    sleep 2  # Dar tiempo para que nginx procese los archivos
-                    if timeout 10 curl -f http://localhost/ > /dev/null 2>&1; then
-                        echo "✅ Sitio web responde correctamente"
-                    else
-                        echo "⚠️ El sitio puede tardar en estar disponible"
-                        echo "🔍 Verificando nginx..."
-                        sudo service nginx status || sudo systemctl status nginx || echo "No se puede verificar nginx"
-                    fi
-                    
-                    echo "🎉 Despliegue completado"
                 '''
             }
         }
@@ -149,43 +54,31 @@ pipeline {
     
     post {
         success {
-            echo '🎉 ¡Éxito! Tu sitio web está desplegado'
+            echo '🎉 ¡Portafolio desplegado exitosamente!'
             echo ''
-            echo '🌐 Para ver tu sitio:'
-            echo '   • En Cloud Shell: Web Preview → Preview on port 80'
-            echo '   • En local: http://localhost'
+            echo '🌐 Ver tu aplicación:'
+            echo '   • Cloud Shell: Web Preview → Preview on port 8088'
+            echo '   • Local: http://localhost:8088'
             echo ''
-            echo '💡 Tips:'
-            echo '   • Refresca la página si no ves cambios'
-            echo '   • Puedes modificar los archivos y ejecutar el pipeline otra vez'
+            echo '🔍 Verificar estado:'
+            echo '   • Health check: http://localhost:8088/health'
+            echo '   • Logs: docker-compose logs web'
         }
         failure {
-            echo '❌ Pipeline falló - ¡Pero es fácil de arreglar!'
+            echo '❌ Error en el despliegue'
             echo ''
-            echo '🔧 SOLUCIÓN PARA CLOUD SHELL:'
-            echo '============================='
+            echo '🔧 Diagnóstico:'
+            sh '''
+                echo "📊 Estado de contenedores:"
+                docker ps -a
+                echo ""
+                echo "📋 Logs de la aplicación:"
+                docker-compose logs web --tail 20 || echo "No hay logs disponibles"
+            '''
             echo ''
-            echo '1️⃣ Abre una nueva terminal en Cloud Shell'
-            echo '2️⃣ Navega al directorio del proyecto:'
-            echo '   cd roxs-devops-jenkins'
-            echo ''
-            echo '3️⃣ Ejecuta el script de permisos:'
-            echo '   sudo ./arreglar-permisos.sh'
-            echo ''
-            echo '4️⃣ Vuelve a Jenkins y ejecuta el pipeline otra vez'
-            echo ''
-            echo '🌐 ACCESO RÁPIDO:'
-            echo '================='
-            echo '• Jenkins: Web Preview → Preview on port 8080'
-            echo '• Tu sitio (después del pipeline): Web Preview → Preview on port 80'
-            echo ''
-            echo '🆘 SI NECESITAS AYUDA:'
-            echo '====================='
-            echo '• Diagnóstico completo: ./diagnostico.sh'
-            echo '• Estado de servicios: ./verificar.sh'
-            echo '• URLs específicas: ./cloud-shell-helper.sh'
-            echo ''
-            echo '💡 Este error es normal la primera vez - ¡solo necesitas configurar permisos una vez!'
+            echo '💡 Verificaciones:'
+            echo '   • ¿Existe el directorio portafolio-web?'
+            echo '   • ¿Está Docker funcionando?'
         }
     }
 }

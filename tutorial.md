@@ -18,7 +18,17 @@
 **Opción 1: Un solo clic (Recomendado)**
 [![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/roxsross/roxs-devops-jenkins.git&cloudshell_tutorial=tutorial.md)
 
-**Opción 2: Manual**
+**Opción 2: Docker Compose (Sin problemas de permisos)**
+```bash
+# Clona este proyecto
+git clone https://github.com/roxsross/roxs-devops-jenkins.git
+cd roxs-devops-jenkins
+
+# ¡Inicia todo con Docker!
+./docker-start.sh
+```
+
+**Opción 3: Instalación tradicional**
 ```bash
 # Clona este proyecto
 git clone https://github.com/roxsross/roxs-devops-jenkins.git
@@ -31,10 +41,14 @@ sudo ./instalar.sh
 ./test-init.sh
 ```
 
-> 💡 **Optimizaciones específicas para Cloud Shell**:
+> 💡 **¿Cuál elegir?**
+> - 🐳 **Docker**: Sin problemas de permisos, más rápido, fácil de limpiar
+> - 🔧 **Tradicional**: Instalación directa en el sistema, más control
+> 
+> **Optimizaciones específicas para Cloud Shell**:
 > - ✅ Detección automática del entorno Cloud Shell
 > - ✅ Timeouts ajustados para el rendimiento de Cloud Shell
-> - ✅ Configuración de permisos específica
+> - ✅ Configuración de permisos específica (solo tradicional)
 > - ✅ URLs automáticas con Web Preview
 > - ✅ Scripts de diagnóstico adaptados
 
@@ -120,7 +134,7 @@ Blue Ocean es la interfaz moderna y visual de Jenkins. ¡Te encantará!
 
 ### En Jenkins:
 1. **Clic en "Nueva Tarea"**
-2. **Nombre**: `mi-primer-pipeline`
+2. **Nombre**: `desplegar-portafolio`
 3. **Selecciona**: "Pipeline"
 4. **Clic en "OK"**
 
@@ -131,6 +145,8 @@ Blue Ocean es la interfaz moderna y visual de Jenkins. ¡Te encantará!
 4. En **"Repository URL"** pon: `https://github.com/roxsross/roxs-devops-jenkins.git`
 5. En **"Branch"** pon: `*/master`
 6. **Guarda**
+
+> 💡 **El pipeline está configurado para usar tu directorio `portafolio-web` automáticamente**
 
 ---
 
@@ -145,6 +161,18 @@ Blue Ocean es la interfaz moderna y visual de Jenkins. ¡Te encantará!
 > - **Selecciona tu pipeline** `mi-primer-pipeline`
 > - **¡Disfruta la vista visual!** 🎨
 
+### 🐳 Con Docker (Recomendado):
+**¡No hay problemas de permisos!** El pipeline debería funcionar inmediatamente.
+
+### 🔧 Con instalación tradicional:
+Si el pipeline falla por permisos (normal la primera vez):
+
+1. **Abre una nueva terminal** en Cloud Shell
+2. **Ejecuta**: `sudo ./arreglar-permisos.sh`
+3. **Vuelve a Jenkins** y ejecuta el pipeline otra vez
+
+> 💡 **¿Por qué usar Docker?** Sin problemas de permisos, más rápido, más limpio.
+
 ---
 
 ## 🌐 Paso 5: Ver tu sitio web
@@ -153,8 +181,8 @@ Blue Ocean es la interfaz moderna y visual de Jenkins. ¡Te encantará!
 
 **Método rápido:**
 1. Busca el menú **⋮** (tres puntos) en la parte superior derecha
-2. Haz clic en **"Web Preview"** → **"Preview on port 80"**
-3. ¡Verás tu Gaming Hub funcionando!
+2. Haz clic en **"Web Preview"** → **"Preview on port 8088"**
+3. ¡Verás tu portafolio funcionando!
 
 **URLs específicas:**
 ```bash
@@ -163,7 +191,7 @@ Blue Ocean es la interfaz moderna y visual de Jenkins. ¡Te encantará!
 ```
 
 ### 🖥️ En tu computadora:
-- Abre: `http://localhost`
+- Abre: `http://localhost:8088`
 
 **¡Deberías ver tu página web funcionando!** 🎉
 
@@ -233,7 +261,7 @@ sudo cat /var/lib/jenkins/secrets/initialAdminPassword
 
 ### En Google Cloud Shell:
 - **Jenkins**: Web Preview → Preview on port 8080
-- **Tu sitio**: Web Preview → Preview on port 80
+- **Tu aplicación**: Web Preview → Preview on port 8088
 - Si no funciona, espera 3-5 minutos y reintenta
 
 ---
