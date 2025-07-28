@@ -13,7 +13,12 @@
 
 ## 🚀 Paso 1: Instalar todo (¡súper fácil!)
 
-### ☁️ En Google Cloud Shell (Recomendado):
+### ☁️ En Google Cloud Shell (100% Optimizado):
+
+**Opción 1: Un solo clic (Recomendado)**
+[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/roxsross/roxs-devops-jenkins.git&cloudshell_tutorial=tutorial.md)
+
+**Opción 2: Manual**
 ```bash
 # Clona este proyecto
 git clone https://github.com/roxsross/roxs-devops-jenkins.git
@@ -22,11 +27,16 @@ cd roxs-devops-jenkins
 # ¡Instala todo con un comando!
 sudo ./instalar.sh
 
-# Helper específico para Cloud Shell (opcional)
-./cloud-shell-helper.sh
+# Inicialización rápida y URLs (específico para Cloud Shell)
+./test-init.sh
 ```
 
-> 💡 **El script está optimizado para Cloud Shell**: Detecta automáticamente Cloud Shell y configura permisos y timeouts específicos para un mejor rendimiento.
+> 💡 **Optimizaciones específicas para Cloud Shell**:
+> - ✅ Detección automática del entorno Cloud Shell
+> - ✅ Timeouts ajustados para el rendimiento de Cloud Shell
+> - ✅ Configuración de permisos específica
+> - ✅ URLs automáticas con Web Preview
+> - ✅ Scripts de diagnóstico adaptados
 
 ### 🖥️ En tu propia computadora Linux:
 ```bash
@@ -46,10 +56,22 @@ sudo ./instalar.sh
 
 ## 🌐 Paso 2: Abrir Jenkins
 
-### ☁️ En Google Cloud Shell:
-1. Busca el menú **⋮** en la parte superior de Cloud Shell
+### ☁️ En Google Cloud Shell (Método optimizado):
+
+**Método 1: Web Preview (Recomendado)**
+1. Busca el menú **⋮** (tres puntos) en la parte superior derecha de Cloud Shell
 2. Haz clic en **"Web Preview"** → **"Preview on port 8080"**
-3. O usa el comando: `./cloud-shell-helper.sh` para ver todas las URLs
+3. Se abrirá Jenkins en una nueva pestaña
+
+**Método 2: Comando rápido**
+```bash
+./test-init.sh  # Te muestra URLs y estado del sistema
+```
+
+**Método 3: URLs directas**
+```bash
+./cloud-shell-helper.sh  # URLs específicas para tu sesión
+```
 
 ### 🖥️ En tu computadora:
 - Abre: `http://localhost:8080`
@@ -128,9 +150,17 @@ Blue Ocean es la interfaz moderna y visual de Jenkins. ¡Te encantará!
 ## 🌐 Paso 5: Ver tu sitio web
 
 ### ☁️ En Google Cloud Shell:
-1. Busca el menú **⋮** en la parte superior de Cloud Shell
+
+**Método rápido:**
+1. Busca el menú **⋮** (tres puntos) en la parte superior derecha
 2. Haz clic en **"Web Preview"** → **"Preview on port 80"**
-3. O ejecuta `./cloud-shell-helper.sh` para ver todas las URLs disponibles
+3. ¡Verás tu Gaming Hub funcionando!
+
+**URLs específicas:**
+```bash
+./test-init.sh        # Estado y URLs actuales
+./cloud-shell-helper.sh  # URLs detalladas para tu sesión
+```
 
 ### 🖥️ En tu computadora:
 - Abre: `http://localhost`

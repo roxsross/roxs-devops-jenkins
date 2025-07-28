@@ -8,10 +8,14 @@ echo "🚀 Instalando Jenkins para principiantes..."
 echo "⏱️  Esto tomará unos minutos..."
 echo ""
 
-# Detectar si estamos en Cloud Shell
-if [[ -n "$CLOUD_SHELL" ]] || [[ "$USER" == "naranjax" ]] || [[ -n "$GOOGLE_CLOUD_PROJECT" ]]; then
+# Detectar si estamos en Cloud Shell (múltiples métodos de detección)
+if [[ -n "$CLOUD_SHELL" ]] || [[ "$USER" == "roxsross" ]] || [[ -n "$GOOGLE_CLOUD_PROJECT" ]] || [[ -n "$DEVSHELL_PROJECT_ID" ]] || [[ "$HOSTNAME" == *"cloudshell"* ]]; then
     echo "☁️ Google Cloud Shell detectado - Usando configuración optimizada"
     IS_CLOUD_SHELL=true
+    # Configurar variables específicas para Cloud Shell
+    export CLOUD_SHELL_JENKINS=true
+    export JENKINS_TIMEOUT=300
+    export NGINX_TIMEOUT=60
 else
     echo "🖥️ Sistema local/VM detectado"
     IS_CLOUD_SHELL=false
@@ -287,10 +291,14 @@ echo ""
 echo "🔍 Verificando instalación..."
 
 # Verificar Jenkins
-if curl -s http://localhost:8080 > /dev/null 2>&1; then
+if curl -s --connect-timeout 10 http://localhost:8080 > /dev/null 2>&1; then
     echo "✅ Jenkins está funcionando correctamente"
 else
     echo "⚠️ Jenkins puede no estar completamente listo"
+    if [ "$IS_CLOUD_SHELL" = true ]; then
+        echo "☁️ En Cloud Shell, Jenkins puede tomar hasta 5-7 minutos en estar completamente operativo"
+        echo "💡 Ejecuta './test-init.sh' en unos minutos para verificar el estado"
+    fi
     if [ "$INIT_SYSTEM" = "systemd" ]; then
         echo "🔧 Verifica con: sudo systemctl status jenkins"
     else
@@ -299,7 +307,7 @@ else
 fi
 
 # Verificar Nginx
-if curl -s http://localhost > /dev/null 2>&1; then
+if curl -s --connect-timeout 5 http://localhost > /dev/null 2>&1; then
     echo "✅ Nginx está funcionando correctamente"
 else
     echo "⚠️ Nginx puede tener problemas"
@@ -358,16 +366,28 @@ fi
 echo ""
 echo "💡 ¡Sigue el tutorial.md para continuar!"
 echo ""
-echo "🛠️ Comandos útiles:"
-if [ "$INIT_SYSTEM" = "systemd" ]; then
-    echo "   • Ver estado Jenkins: sudo systemctl status jenkins"
-    echo "   • Ver logs Jenkins: sudo journalctl -u jenkins -f"
-    echo "   • Reiniciar Jenkins: sudo systemctl restart jenkins"
-    echo "   • Ver estado Nginx: sudo systemctl status nginx"
+if [ "$IS_CLOUD_SHELL" = true ]; then
+    echo "☁️ Comandos específicos para Cloud Shell:"
+    echo "   • Inicialización rápida: ./test-init.sh"
+    echo "   • URLs y configuración: ./cloud-shell-helper.sh"
+    echo "   • Verificación completa: ./verificar.sh"
+    echo "   • Diagnóstico detallado: ./diagnostico.sh"
+    echo ""
+    echo "🌐 Acceso rápido:"
+    echo "   • Jenkins: Web Preview → Preview on port 8080"
+    echo "   • Tu sitio: Web Preview → Preview on port 80"
 else
-    echo "   • Ver estado Jenkins: sudo service jenkins status"
-    echo "   • Ver logs Jenkins: sudo tail -f /var/log/jenkins/jenkins.log"
-    echo "   • Reiniciar Jenkins: sudo service jenkins restart"
-    echo "   • Ver estado Nginx: sudo service nginx status"
+    echo "🛠️ Comandos útiles:"
+    if [ "$INIT_SYSTEM" = "systemd" ]; then
+        echo "   • Ver estado Jenkins: sudo systemctl status jenkins"
+        echo "   • Ver logs Jenkins: sudo journalctl -u jenkins -f"
+        echo "   • Reiniciar Jenkins: sudo systemctl restart jenkins"
+        echo "   • Ver estado Nginx: sudo systemctl status nginx"
+    else
+        echo "   • Ver estado Jenkins: sudo service jenkins status"
+        echo "   • Ver logs Jenkins: sudo tail -f /var/log/jenkins/jenkins.log"
+        echo "   • Reiniciar Jenkins: sudo service jenkins restart"
+        echo "   • Ver estado Nginx: sudo service nginx status"
+    fi
+    echo "   • Diagnóstico completo: ./diagnostico.sh"
 fi
-echo "   • Diagnóstico completo: ./diagnostico.sh"

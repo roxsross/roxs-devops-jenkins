@@ -7,7 +7,7 @@ echo "☁️ Cloud Shell Helper - Configuración optimizada para Jenkins"
 echo ""
 
 # Verificar que estamos en Cloud Shell
-if [[ -z "$CLOUD_SHELL" ]] && [[ "$USER" != "naranjax" ]] && [[ -z "$GOOGLE_CLOUD_PROJECT" ]]; then
+if [[ -z "$CLOUD_SHELL" ]] && [[ "$USER" != "roxsross" ]] && [[ -z "$GOOGLE_CLOUD_PROJECT" ]]; then
     echo "⚠️ Este script está optimizado para Google Cloud Shell"
     echo "💡 Puedes usarlo en otros sistemas, pero puede no ser necesario"
     echo ""

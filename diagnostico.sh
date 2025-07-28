@@ -166,13 +166,20 @@ echo "   sudo ./instalar.sh"
 echo ""
 
 # URLs específicas para Cloud Shell
-if [[ -n "$CLOUD_SHELL" ]]; then
+if [[ -n "$CLOUD_SHELL" ]] || [[ "$USER" == "roxsross" ]] || [[ -n "$GOOGLE_CLOUD_PROJECT" ]] || [[ -n "$DEVSHELL_PROJECT_ID" ]]; then
     echo "🌐 URLs PARA GOOGLE CLOUD SHELL:"
     echo "================================="
-    EXTERNAL_IP=$(curl -s ifconfig.me 2>/dev/null || echo "unknown")
-    SAFE_IP=$(echo $EXTERNAL_IP | tr '.' '-')
-    echo "Jenkins: https://8080-${SAFE_IP}-8080.googleusercontent.com"
-    echo "O usa: Web Preview → Preview on port 8080"
+    echo "🔧 Jenkins:"
+    echo "   • Método recomendado: Web Preview → Preview on port 8080"
+    echo "   • Desde el menú Cloud Shell (⋮) → Web Preview → Preview on port 8080"
+    echo ""
+    echo "🌐 Tu sitio web:"
+    echo "   • Método recomendado: Web Preview → Preview on port 80"
+    echo "   • Desde el menú Cloud Shell (⋮) → Web Preview → Preview on port 80"
+    echo ""
+    echo "💡 Comandos específicos para Cloud Shell:"
+    echo "   • ./test-init.sh - Inicialización rápida y URLs"
+    echo "   • ./cloud-shell-helper.sh - URLs detalladas"
     echo ""
 fi
 

@@ -13,16 +13,24 @@
 
 ## 🚀 ¡Empezar ahora!
 
-### ☁️ En Google Cloud Shell (Recomendado):
+### ☁️ En Google Cloud Shell (Recomendado - 100% Optimizado):
 
 [![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/roxsross/roxs-devops-jenkins.git&cloudshell_tutorial=tutorial.md)
 
-**O manualmente:**
+**O manualmente en Cloud Shell:**
 ```bash
 git clone https://github.com/roxsross/roxs-devops-jenkins.git
 cd roxs-devops-jenkins
 sudo ./instalar.sh
+./cloud-shell-helper.sh  # URLs y configuración específica
 ```
+
+**🎯 Características específicas para Cloud Shell:**
+- ✅ Detección automática de Cloud Shell
+- ✅ Timeouts optimizados para el entorno
+- ✅ URLs automáticas con Web Preview
+- ✅ Configuración de permisos específica
+- ✅ Scripts de diagnóstico adaptados
 
 ### 🖥️ En tu computadora local:
 
@@ -40,11 +48,14 @@ sudo ./instalar.sh
 - **🔧 Script de instalación** - Todo automático y optimizado para Cloud Shell
 - **☁️ Helper de Cloud Shell** - URLs y configuración específica  
 - **🔍 Script de diagnóstico** - Resuelve problemas comunes
-- **📁 Sitio web de ejemplo** - Para practicar
+- **📁 Sitio web de ejemplo** - Gaming Hub interactivo
 - **⚙️ Pipeline básico** - Listo para usar
 
-### 🛠️ Scripts útiles:
+### 🛠️ Scripts útiles (optimizados para Cloud Shell):
 ```bash
+# Helper específico para Cloud Shell (URLs y configuración)
+./cloud-shell-helper.sh
+
 # Verificación rápida de todo el sistema
 ./verificar.sh
 
@@ -54,8 +65,8 @@ sudo ./instalar.sh
 # Si el pipeline falla por permisos sudo
 sudo ./arreglar-permisos.sh
 
-# Helper específico para Cloud Shell (URLs y configuración)
-./cloud-shell-helper.sh
+# Inicialización rápida para Cloud Shell
+./test-init.sh
 ```
 
 ### 🔧 Compatibilidad total:

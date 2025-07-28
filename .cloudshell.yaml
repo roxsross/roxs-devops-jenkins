@@ -1,17 +1,34 @@
-# Tutorial Jenkins para Principiantes - Optimizado para Cloud Shell
+# 🚀 Jenkins para Principiantes - Optimizado para Google Cloud Shell
 cloudshell_tutorial:
   path: tutorial.md
 
-# Archivos a mostrar al empezar
+# Configuración del workspace para Cloud Shell
 workspace:
+  # Archivos a mostrar al empezar
   open_files:
     - "tutorial.md"
     - "README.md"
     - "instalar.sh"
     - "cloud-shell-helper.sh"
-    - "diagnostico.sh"
-    - "Jenkinsfile"
 
-# Configuración inicial
+# Configuración inicial específica para Cloud Shell
 cloudshell_open:
   - url: "https://shell.cloud.google.com/cloudshell/editor?terminal=true&cloudshell_tutorial=tutorial.md"
+
+# Variables de entorno específicas para Cloud Shell
+env:
+  CLOUD_SHELL_JENKINS: "true"
+  JENKINS_TIMEOUT: "300"
+  NGINX_TIMEOUT: "60"
+
+# Comandos de inicio automático (opcional)
+cloudshell_startup:
+  # Verificar si Jenkins ya está instalado
+  - command: "[ -f /usr/share/jenkins/jenkins.war ] && echo '✅ Jenkins ya instalado' || echo '💡 Ejecuta: sudo ./instalar.sh'"
+  
+# Configuración de puertos para Cloud Shell
+ports:
+  - port: 8080
+    description: "Jenkins - Interfaz de administración"
+  - port: 80
+    description: "Sitio web desplegado"

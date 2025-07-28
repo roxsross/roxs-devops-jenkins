@@ -8,7 +8,7 @@ echo "🔧 Arreglando permisos de Jenkins para pipelines..."
 echo ""
 
 # Detectar si estamos en Cloud Shell
-if [[ -n "$CLOUD_SHELL" ]] || [[ "$USER" == "naranjax" ]] || [[ -n "$GOOGLE_CLOUD_PROJECT" ]]; then
+if [[ -n "$CLOUD_SHELL" ]] || [[ "$USER" == "roxsross" ]] || [[ -n "$GOOGLE_CLOUD_PROJECT" ]]; then
     echo "☁️ Google Cloud Shell detectado - Usando configuración optimizada"
     IS_CLOUD_SHELL=true
 else
