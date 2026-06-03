@@ -1,0 +1,137 @@
+# Ref: https://github.com/the-pr-agent/pr-agent/blob/main/pr_agent/settings/configuration.toml
+# Solo se sobreescriben valores que difieren del default.
+
+[config]
+response_language    = "es"
+max_model_tokens     = 32000
+enable_custom_labels = true
+
+# ---------------------------------------------------------------------------
+# DESCRIBE
+# ---------------------------------------------------------------------------
+[pr_description]
+publish_labels                    = true
+generate_ai_title                 = true
+use_bullet_points                 = true
+enable_semantic_files_types       = true
+enable_pr_diagram                 = false
+add_original_user_description     = true
+extra_instructions = """\
+- Describí los cambios agrupados por capa: CI/CD, aplicación, infraestructura, configuración.
+- Si el PR toca archivos de pipeline (.yml/.yaml), mencioná qué stages o jobs fueron afectados.
+- Si hay cambios en Dockerfile, manifests de Kubernetes/Helm o módulos Terraform, indicalo explícitamente.
+- Si hay cambios en dependencias (package.json, requirements.txt, *.tf providers), mencionalo.
+- Usá lenguaje técnico claro, sin adornos.
+"""
+
+# ---------------------------------------------------------------------------
+# REVIEW
+# ---------------------------------------------------------------------------
+[pr_reviewer]
+require_focused_review            = true
+require_security_review           = true
+require_estimate_effort_to_review = true
+require_can_be_split_review       = true
+require_tests_review              = true
+require_todo_scan                 = true
+num_max_findings                  = 5
+extra_instructions = """\
+Responde exclusivamente en español técnico, directo y profesional.
+
+Objetivo del comando /review:
+- Priorizar bugs reales, regresiones funcionales, riesgos de seguridad y faltantes de pruebas.
+- Evitar observaciones cosméticas si no impactan mantenibilidad, confiabilidad o performance.
+
+Marco de revisión:
+- Seguridad
+- Performance y eficiencia
+- Calidad y mantenibilidad
+- Arquitectura y diseño
+- Testing y cobertura
+
+Checklist para Node.js / TypeScript:
+- Confirmar tipado robusto; evitar any y castings inseguros sin justificación explícita.
+- Verificar flujos asíncronos: promesas no esperadas, errores no capturados, condiciones de carrera.
+- Revisar validación de entradas y manejo seguro de secrets/tokens (no loggear, no hardcodear).
+- Evaluar complejidad ciclomática, duplicación y oportunidades de extraer funciones puras.
+- Verificar que variables de entorno requeridas sean validadas al arranque, no inline.
+- Detectar ausencia de graceful shutdown en servers o consumers.
+
+Checklist para Python:
+- Verificar type hints en funciones públicas y en fronteras de módulo.
+- Detectar uso de print() en código de producción; debe reemplazarse por logger estructurado.
+- Revisar manejo de excepciones: evitar except Exception genérico sin re-raise ni logging.
+- Validar que los tests usen fixtures y no tengan lógica de setup duplicada.
+- Detectar imports no utilizados, dependencias circulares y funciones con demasiadas responsabilidades.
+
+Checklist para Terraform:
+- Todo recurso debe tener bloque tags con al menos: environment, project, managed_by.
+- No hardcodear ARNs, account IDs, regiones ni CIDRs; usar variables o data sources.
+- Verificar que providers y versión de Terraform tengan constraints explícitos en versions.tf.
+- Detectar recursos críticos (RDS, S3, DynamoDB, EKS) sin lifecycle prevent_destroy = true.
+- Revisar security groups: detectar ingress 0.0.0.0/0 en puertos sensibles sin justificación.
+- Detectar módulos sin outputs.tf o variables.tf separados.
+
+Checklist para CI/CD y pipelines:
+- Detectar secrets o tokens hardcodeados en YAMLs, scripts o Dockerfiles.
+- Verificar que las GitHub Actions usen versiones fijas (@v4), no @main o @master.
+- Detectar scripts bash sin set -euo pipefail o sin validación de exit codes.
+- Verificar que Dockerfiles no usen latest y apliquen multi-stage build cuando corresponda.
+- Detectar jobs sin timeout explícito.
+
+Estructura de salida obligatoria:
+- Crítico: bloquear merge.
+- Alto: corregir antes de producción.
+- Medio: corregir en el ciclo actual.
+- Bajo: mejora recomendada.
+Cada hallazgo debe incluir: archivo, contexto, impacto y recomendación concreta.
+Si no hay hallazgos, indicarlo explícitamente y mencionar riesgos residuales.
+"""
+
+# ---------------------------------------------------------------------------
+# IMPROVE
+# ---------------------------------------------------------------------------
+[pr_code_suggestions]
+commitable_code_suggestions         = false
+num_code_suggestions_per_chunk      = 4
+focus_only_on_problems              = true
+demand_code_suggestions_self_review = true
+extra_instructions = """\
+Responde exclusivamente en español técnico y profesional.
+
+Objetivo del comando /improve:
+- Proponer cambios concretos, pequeños y aplicables que mejoren confiabilidad, legibilidad y mantenibilidad.
+- Priorizar mejoras con impacto real: bugs, seguridad, performance, deuda técnica. No solo estilo.
+
+Reglas para Node.js / TypeScript:
+- Mantener naming consistente: camelCase para variables/métodos, PascalCase para tipos/clases.
+- Preferir funciones cortas, cohesión alta, bajo acoplamiento y responsabilidad única.
+- Evitar duplicación (DRY) y extraer utilidades compartidas cuando el beneficio sea claro.
+- Sugerir tipos explícitos en fronteras de módulo y contratos públicos.
+- Incluir mejoras de seguridad: validación de input, control de errores, manejo de secrets.
+
+Reglas para Python:
+- Sugerir type hints cuando falten en funciones públicas.
+- Reemplazar print() por logging estructurado.
+- Proponer fixtures de pytest cuando haya setup duplicado en tests.
+- Sugerir dataclasses o TypedDict para estructuras de datos sin tipado.
+
+Reglas para Terraform:
+- Sugerir extracción a variable cuando hay valores literales repetidos.
+- Proponer data sources en lugar de ARNs hardcodeados.
+- Sugerir lifecycle rules en recursos de estado o almacenamiento.
+- Proponer descripción explícita en reglas de security group sin ella.
+
+Reglas para CI/CD:
+- Sugerir set -euo pipefail en scripts bash que no lo tengan.
+- Proponer versiones fijas en GitHub Actions que usen @main o @master.
+- Detectar y señalar variables de entorno accedidas sin validación previa.
+- Ignorar cambios en archivos de lock: package-lock.json, yarn.lock, poetry.lock, .terraform.lock.hcl.
+- Ignorar cambios puramente de formato o indentación sin impacto en lógica.
+
+Formato de sugerencias:
+- Explicar problema, razón técnica y cambio propuesto.
+- Mostrar diff mínimo y seguro de aplicar.
+- Indicar impacto esperado y posibles efectos secundarios.
+- Incluir caso de test unitario o de integración cuando aplique.
+"""
