@@ -1,12 +1,36 @@
 [config]
-# idioma de los reviews
 response_language = "es"
+# evita reviews en PRs enormes sin comprimir
+max_model_tokens = 32000
 
 [pr_reviewer]
 require_focused_review = true
 require_security_review = true
-num_code_suggestions = 4
+num_code_suggestions = 6
+
+# que explique el razonamiento de cada sugerencia
+inline_code_comments = true
+
+# detecta breaking changes
+require_estimate_effort_to_review = true
+require_can_be_split_review = true
+
+# útil para pipelines: detecta hardcodeos, secrets expuestos
+require_no_hardcoded_secrets = true
 
 [pr_description]
 publish_labels = true
 generate_ai_title = true
+
+# genera un walkthrough por archivo cambiado
+enable_semantic_files_types = true
+use_bullet_points = true
+
+[pr_code_suggestions]
+# aplica sugerencias directamente como commits
+auto_apply_suggestions = false
+
+# muestra diff antes/después
+show_diff = true
+
+num_code_suggestions = 6
