@@ -34,3 +34,6 @@ auto_apply_suggestions = false
 show_diff = true
 
 num_code_suggestions = 6
+
+[pr_description.diagram]
+enabled = false
