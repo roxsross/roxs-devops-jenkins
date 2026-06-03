@@ -1,0 +1,12 @@
+[config]
+# idioma de los reviews
+response_language = "es"
+
+[pr_reviewer]
+require_focused_review = true
+require_security_review = true
+num_code_suggestions = 4
+
+[pr_description]
+publish_labels = true
+generate_ai_title = true
